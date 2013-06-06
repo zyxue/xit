@@ -33,8 +33,7 @@ def grped_distr(data, A, C, **kw):
     fig = plt.figure(figsize=figsize)
 
     if 'subplots_adjust' in pt_dd:
-        fig.subplots_adjust(**utils.float_params(
-                pt_dd['subplots_adjust'], 'hspace', 'wspace'))
+        fig.subplots_adjust(**pt_dd['subplots_adjust'])
 
     ncol, nrow = utils.gen_rc(len(dsets.keys()))
     logger.info('Chosen # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
@@ -42,9 +41,8 @@ def grped_distr(data, A, C, **kw):
         ax = fig.add_subplot(nrow, ncol, c+1)
         dset = dsets[dsetk]
         if 'text' in dset:
-            ax.text(s=dset['text'],
-                    **utils.float_params(pt_dd['text'], 'x', 'y'))
-        for kkey in dset['data']:                                 # ind: individual
+            ax.text(s=dset['text'], **pt_dd['text'])
+        for kkey in dset['data']: # ind: individual
             da = dset['data'][kkey]
             params = get_params(kkey, pt_dd)
             if A.plot_type in ['grped_distr', 'grped_alx']:
@@ -61,12 +59,13 @@ def grped_distr(data, A, C, **kw):
                                 where=None, facecolor=params.get('color'), alpha=.3)
 
                 # now, plot the vertical bar showing the average value
-                m = da[1][0]                                    # mean
-                e = da[1][1]                                    # error
+                m = da[1][0]    # mean
+                e = da[1][1]    # error
                 ax.plot([m,m], [0,1], color='black')
                 ax.fill_betweenx([0,1], [m-e, m-e], [m+e, m+e],
                                  where=None, facecolor='black', alpha=.3)
 
+        # plot a vertical line if needed, e.g. showing the time of convergence
         if 'vline' in pt_dd:
             vl = pt_dd['vline']
             x = float(vl['x'])
@@ -86,9 +85,15 @@ def grped_distr(data, A, C, **kw):
             print "DO something special"
             ax.set_xlim([0, 500])
             ax.set_xticklabels([str(i) for i in xrange(0,600, 100)])
-            for tick in ax.xaxis.get_major_ticks():                                                      
-                tick.label1On = False                                                                    
-                tick.label2On = True               # move the ticks to the top 
+            for tick in ax.xaxis.get_major_ticks():
+                tick.label1On = False
+                tick.label2On = True # move the ticks to the top 
+
+    if 'figlegend' in pt_dd:
+        leg = fig.legend(handles=ax.lines, **pt_dd['figlegend'])
+        if 'legend_linewidth' in pt_dd:
+            for _ in leg.legendHandles:
+                _.set_linewidth(pt_dd['legend_linewidth'])
 
     plt.savefig(utils.gen_output_filename(A, C))
 
@@ -136,22 +141,13 @@ def grped_distr_ave(data, A, C, **kw):
 def get_params(key, pt_dd):
     params = {}
     if 'colors' in pt_dd:
-        params['color'] = utils.get_col(utils.get_param(pt_dd['colors'], key))
+        params['color'] = utils.get_param(pt_dd['colors'], key)
     if 'labels' in pt_dd:
         params['label'] = utils.get_param(pt_dd['labels'], key)
     return params
 
 def decorate_ax(ax, pt_dd, ncol, nrow, c):
     """c: counter"""
-    if 'grid' in pt_dd:
-        ax.grid(**pt_dd['grid'])
-    if 'legends' in pt_dd:
-        leg = ax.legend(loc='best')
-    if 'xlim' in pt_dd: 
-        ax.set_xlim(**utils.float_params(pt_dd['xlim'], 'left', 'right'))
-    if 'ylim' in pt_dd:
-        ax.set_ylim(**utils.float_params(pt_dd['ylim'], 'bottom', 'top'))
-
     if c < (ncol * nrow - ncol):
         ax.set_xticklabels([])
         # ax.get_xaxis().set_visible(False)                   # this hide the whole axis
@@ -165,8 +161,8 @@ def decorate_ax(ax, pt_dd, ncol, nrow, c):
     else:
         ax.set_yticklabels([])
 
-    if 'xscale' in pt_dd: ax.set_xscale(pt_dd['xscale'])
-
-    if 'legend_linewidth' in pt_dd:
-        for l in leg.legendHandles:
-            l.set_linewidth(float(pt_dd['legend_linewidth']))
+    if 'grid' in pt_dd:   ax.grid(**pt_dd['grid'])
+    if 'xlim' in pt_dd:   ax.set_xlim(**pt_dd['xlim'])
+    if 'ylim' in pt_dd:   ax.set_ylim(**pt_dd['ylim'])
+    if 'xscale' in pt_dd: ax.set_xscale(**pt_dd['xscale'])
+    if 'legend' in pt_dd: ax.legend(**pt_dd['legend'])

@@ -114,16 +114,16 @@ def split(l, group_size):
             k += 1                             # asure to include the remainder
         return [l[(i * n): ((i+1) * n)] for i in xrange(k)]
 
-def float_params(d, *key_list):
-    """
-    this is not very great way of trying to do what json does
+# def float_params(d, *key_list):
+#     """
+#     this is not very great way of trying to do what json does
 
-    key_list contains the names of properties as specified in the xit
-    configuration file (e.g. xitconfig) that need to be converted to float
-    """
-    # overwrite old vals with floated ones
-    d.update({k:float(d[k]) for k in key_list if k in d})
-    return d
+#     key_list contains the names of properties as specified in the xit
+#     configuration file (e.g. xitconfig) that need to be converted to float
+#     """
+#     # overwrite old vals with floated ones
+#     d.update({k:float(d[k]) for k in key_list if k in d})
+#     return d
 
 def gen_id_paths_r(vars_, dir_templates, id_template='', result=[], **kw):
     """_r means recursion"""
@@ -368,18 +368,9 @@ def get_pt(A):
             pt = getattr(A, _)
             return pt
 
-def is_plot_type(f):
-    """used as a decorator to label plot_type functions"""
-    setattr(f, 'IS_PLOT_TYPE', 1)
-    return f
-
-def is_plotmp_type(f):
-    setattr(f, 'IS_PLOT2P_TYPE', 1)
-    return f
-
-def get_col(c):
-    """convert to correct color values"""
-    return '#{0}'.format(c) if re.match('[A-F0-9]{6}', c) else c
+# def get_col(c):
+#     """convert to correct color values"""
+#     return '#{0}'.format(c) if re.match('[A-F0-9]{6}', c) else c
 
 def get_param(pt_dd_val, k):
     """find the exactly matched val or do regex search, or return None"""
@@ -390,6 +381,15 @@ def get_param(pt_dd_val, k):
                 v = pt_dd_val[_]
                 break
     return v
+
+def is_plot_type(f):
+    """used as a decorator to label plot_type functions"""
+    setattr(f, 'IS_PLOT_TYPE', 1)
+    return f
+
+def is_plotmp_type(f):
+    setattr(f, 'IS_PLOT2P_TYPE', 1)
+    return f
 
 # def is_transformable(f):
 #     """if IS_TRANSFORMABLE, then can be transformed to a hdf5 file"""

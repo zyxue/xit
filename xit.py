@@ -7,8 +7,10 @@ import logging
 logger = logging.getLogger(__name__)
 import pprint
 
+import yaml
+import yaml_utils
+yaml.add_constructor('!include', yaml_utils.include)
 # from scipy import stats
-from configobj import ConfigObj
 
 import utils
 import xutils
@@ -26,7 +28,8 @@ def main():
         raise IOError("{0} cannot found".format(config))
 
     logger.info('reading configuration file: {0}'.format(config))
-    C = ConfigObj(config)                                  # config_params
+
+    C = yaml.load(open(config))                                  # config_params
     vars_ = utils.get_vars(A, C)
     logger.debug(vars_)
     dir_tmpls = utils.get_dir_tmpls(A, C)

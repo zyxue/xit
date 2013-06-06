@@ -14,7 +14,7 @@ def gen_cmds(A, C, core_vars):
     for cv in core_vars:
         dpp = utils.get_dpp(cv)                             # dpp: deepest path
         io_files = utils.gen_io_files(dpp, cv['id_'])
-        root = os.path.dirname(os.path.abspath(C.filename))
+        root = os.path.dirname(os.path.abspath(A.config))
 
         kw = {}
         kw.update(inputdir=dpp)

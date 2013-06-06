@@ -74,7 +74,7 @@ def get_args(args_to_parse=None):
                              help=("use proxtcf instead of orderxtcf for quick analysis, "
                                    "especially when the later hasn't been generated"))
     anal_parser.add_argument('--opt_arg', help=('this is used for tool specific arguments specified'
-                                                'in the .xitconfig file (e.g. var1, var2, or var3)'))
+                                                'in the .xitconfig.yaml file (e.g. var1, var2, or var3)'))
 
     transform_parser = subparsers.add_parser(
         'transform', help=('transform the file formats from analysis step (e.g. xvg) to hdf5 format, '
@@ -91,7 +91,7 @@ def get_args(args_to_parse=None):
     plot_parser.add_argument('--plot_type', choices=PLOT_TYPES.keys(), help='e.g {0}'.format(PLOT_TYPES.keys()))
     # plot_parser.add_argument('--scale', action='store_true', help='scale to 1, when map plotting is not obvious')
 
-    # shouldn't be used, instead put it in the .xitconfig --2013-05-09
+    # shouldn't be used, instead put it in the .xitconfig.yaml --2013-05-09
     # plot_parser.add_argument('--normid', help='var1, etc')
 
     plotmp_parser = subparsers.add_parser(
@@ -114,7 +114,7 @@ def get_args(args_to_parse=None):
         # --vars in right after argparse.ArgumentParser, which is strange
         p.add_argument('-v', '--vars', nargs='+', action=convert_vars,
                        help='list of vars, as defined in the .xit file, command line options override .xit')
-        p.add_argument('-g', '--config', default='.xitconfig', help='specify the config option if not default')
+        p.add_argument('-g', '--config', default='.xitconfig.yaml', help='specify the config option if not default')
         p.add_argument('--nobackup', action='store_true', help="don't back the file to speed up analysis")
         p.add_argument('--loglevel', default='info', help="don't back the file to speed up analysis")
 
@@ -125,7 +125,7 @@ def get_args(args_to_parse=None):
         p.add_argument('-p' , '--property', help='{0}'.format(PROPERTIES.keys()))
 
     for p in [anal_parser, transform_parser, plot_parser, plotmp_parser]:
-        p.add_argument('--hdf5', help='specify the .h5 file to use if not configured in .xitconfig')
+        p.add_argument('--hdf5', help='specify the .h5 file to use if not configured in .xitconfig.yaml')
 
     args = parser.parse_args(args_to_parse)
     return args
