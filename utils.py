@@ -296,59 +296,59 @@ def gen_output_filename(A, C):
 def get_anal_dd(C, anal_name):
     r = C.get('anal')
     if not r:
-        logger.info('[anal] NOT found in {0}'.format(C.filename))
+        logger.info('anal NOT found')
         return {}
     rr = r.get(anal_name)
     if not rr:
-        logger.info('[[{0}]] NOT found in [anal]'.format(anal_name)) 
+        logger.info('{0} NOT found under anal')
         return {}
     return rr
 
 def get_prop_dd(C, prop_name):
     """
-    get the configuration for a particular property (prop) in the plot section
+    get the configuration for a particular property (prop) under the plot section
     of .xitconfig
     """
     r = C.get('plot')
     if not r:
-        logger.info('[plot] NOT found in {0}'.format(C.filename))
+        logger.info('plot NOT found')
         return {}
     rr = r.get(prop_name)
     if not rr:
-        logger.info('[[{0}]] NOT found in [plot] in {1}'.format(prop_name, C.filename))
+        logger.info('{0} NOT found under plot')
         return {}
-    logger.info('found [[{0}]] in [plot] in {1}'.format(prop_name, C.filename))
+    logger.info('found {0} under plot'.format(prop_name))
     return rr
 
 def get_pt_dd(C, prop_name, pt_name):
-    """get the configuration for plot type or plotmp type (pt) in the plots
+    """get the configuration for plot type or plotmp type (pt) under the plots
     section of .xitconfig"""
     r = get_prop_dd(C, prop_name)
     if r:
         rr = r.get(pt_name)
         if rr:
-            logger.info('found [[[{0}]]] in [[{1}]]'.format(pt_name, prop_name))
+            logger.info('found {0} under {1}'.format(pt_name, prop_name))
             return rr
         else:
-            logger.info('[[[{0}]]] NOT found in [[{1}]]'.format(pt_name, prop_name))
+            logger.info('{0} NOT found under {1}'.format(pt_name, prop_name))
 
-    logger.info('starting looking into [plotmp] for [[[{0}]]]...'.format(pt_name))
+    logger.info('starting looking into plotmp for {0}...'.format(pt_name))
     # assumed there will be not name overlap in plot and plotmp sections since
     # in the former, only one property is expected while in the later case, two
     # are.
     s = C.get('plotmp')
     if not s:
-        logger.info('[plotmp] NOT found in {0}'.format(C.filename))
+        logger.info('plotmp NOT found')
         return {}
     ss = s.get(prop_name)
     if not ss:
-        logger.info('[[{0}]] NOT found in [plotmp] in {1}'.format(prop_name, C.filename))
+        logger.info('{0} NOT found under plotmp'.format(prop_name))
         return {}
     sss = ss.get(pt_name)
     if not sss:
-        logger.info('[[[{0}]]] NOT found in [[{1}]]'.format(pt_name, prop_name))
+        logger.info('{0} NOT found in {1}'.format(pt_name, prop_name))
         return {}
-    logger.info('found [[[{0}]]] in [[{1}]]'.format(pt_name, prop_name))
+    logger.info('found {0} in {1}'.format(pt_name, prop_name))
     return sss
 
 def get_prop(A):
