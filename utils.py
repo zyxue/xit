@@ -315,9 +315,9 @@ def get_prop_dd(C, prop_name):
         return {}
     rr = r.get(prop_name)
     if not rr:
-        logger.info('{0} NOT found under plot')
+        logger.info('"{0}" NOT found under "plot"'.format(prop_name))
         return {}
-    logger.info('found {0} under plot'.format(prop_name))
+    logger.info('found "{0}" under "plot"'.format(prop_name))
     return rr
 
 def get_pt_dd(C, prop_name, pt_name):
@@ -327,12 +327,12 @@ def get_pt_dd(C, prop_name, pt_name):
     if r:
         rr = r.get(pt_name)
         if rr:
-            logger.info('found {0} under {1}'.format(pt_name, prop_name))
+            logger.info('found "{0}" under "{1}"'.format(pt_name, prop_name))
             return rr
         else:
-            logger.info('{0} NOT found under {1}'.format(pt_name, prop_name))
+            logger.info('"{0}" NOT found under "{1}"'.format(pt_name, prop_name))
 
-    logger.info('starting looking into plotmp for {0}...'.format(pt_name))
+    logger.info('starting looking into plotmp for "{0}"...'.format(pt_name))
     # assumed there will be not name overlap in plot and plotmp sections since
     # in the former, only one property is expected while in the later case, two
     # are.
@@ -342,13 +342,13 @@ def get_pt_dd(C, prop_name, pt_name):
         return {}
     ss = s.get(prop_name)
     if not ss:
-        logger.info('{0} NOT found under plotmp'.format(prop_name))
+        logger.info('"{0}" NOT found under plotmp'.format(prop_name))
         return {}
     sss = ss.get(pt_name)
     if not sss:
-        logger.info('{0} NOT found in {1}'.format(pt_name, prop_name))
+        logger.info('"{0}" NOT found in "{1}"'.format(pt_name, prop_name))
         return {}
-    logger.info('found {0} in {1}'.format(pt_name, prop_name))
+    logger.info('found "{0}" in "{1}"'.format(pt_name, prop_name))
     return sss
 
 def get_prop(A):
