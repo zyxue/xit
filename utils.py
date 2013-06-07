@@ -414,6 +414,30 @@ def reverse_mapping(dd):
             new_dd[i] = k
     return new_dd
 
+def gen_paths_dict(core_vars):
+    PATH_KEY_RE = re.compile('path\d+')
+    paths = {}
+    # data structure of paths with depth as the key
+    # paths = {
+    #     1: set(d1, d2),
+    #     2: set(d1/dd1, d1/dd2, d2/dd1, d2/dd2),
+    #     3: set(d1/dd1/ddd1, d1/dd1/ddd2,
+    #            d1/dd2/ddd1, d1/dd2/ddd2,
+    #            d2/dd1/ddd1, d2/dd1/ddd2,
+    #            d2/dd2/ddd1, d2/dd2/ddd2),
+    #     }
+    for cv in core_vars:
+        for key in cv.keys():
+            if re.match(PATH_KEY_RE, key):
+                path = cv[key]
+                depth = path.count('/') + 1
+                if depth in paths:
+                    paths[depth].add(path)
+                else:
+                    paths[depth] = set([path])
+    return paths
+
+
 # def is_transformable(f):
 #     """if IS_TRANSFORMABLE, then can be transformed to a hdf5 file"""
 #     setattr(f, 'IS_TRANSFORMABLE', 1)

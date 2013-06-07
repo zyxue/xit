@@ -40,9 +40,8 @@ def main():
     # sys.exit(1)
     subcmd = sys.argv[1]                                    # subcommand
     if subcmd == 'prep':
-        pass
-    elif subcmd == 'org':
-        pass
+        import prep
+        prep.prepare(A, C, core_vars)
     elif subcmd == 'anal':
         import anal
         anal.analyze(A, C, core_vars)

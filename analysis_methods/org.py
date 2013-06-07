@@ -35,17 +35,21 @@ def g_select(**kw):
     gssk = dd['gssk_fmt'].format(**kw)
     gss  = dd['gss'].get('const') + dd['gss'][gssk]                   # gss: g_select selction
     if os.path.exists(kw['ordergrof']):
-        return """g_select \
--f {ordergrof} \
--s {ordergrof} \
--on {repo_ndx} \
--select '{gss}'""".format(repo_ndx=repo_ndx, gss=gss, **kw)
+        thegrof = kw['ordergrof']
+        thetprf = kw['tprf']
     else:
-        return """g_select \
--f {grof} \
--s {tprf} \
+        if kw['use_pro']:
+            thegrof = kw['progrof']
+            thetprf = kw['progrof']
+        else:
+            thegrof = kw['grof']
+            thetprf = kw['grof']
+        
+    return """g_select \
+-f {thegrof} \
+-s {thetprf} \
 -on {repo_ndx} \
--select '{gss}'""".format(repo_ndx=repo_ndx, gss=gss, **kw)
+-select '{gss}'""".format(thegrof=thegrof, thetprf=thetprf, repo_ndx=repo_ndx, gss=gss, **kw)
 
 def symlink_ndx(**kw):
     dd = utils.get_anal_dd(kw['C'], 'g_select')

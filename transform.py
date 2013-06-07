@@ -1,4 +1,3 @@
-import re
 import os
 import logging
 logger = logging.getLogger(__name__)
@@ -7,12 +6,12 @@ import tables
 import numpy as np
 from MDAnalysis import Universe
 
-import utils
+import utils as U
 import objs
 import prop
 
 def transform(A, C, core_vars):
-    h5 = utils.get_h5(A, C)
+    h5 = U.get_h5(A, C)
 
     if A.init_hdf5:
         init_hdf5(h5, core_vars)
@@ -21,7 +20,7 @@ def transform(A, C, core_vars):
     anal_dir = C['data']['analysis']
 
     for cv in core_vars:
-        id_, dpp = cv['id_'], os.path.join('/', utils.get_dpp(cv))
+        id_, dpp = cv['id_'], os.path.join('/', U.get_dpp(cv))
         # ad: anal dir, out of names
         adir = os.path.join(anal_dir, 'r_{0}'.format(A.property))
         # af: anal file
@@ -64,8 +63,8 @@ def put_data(ft, f, schema, h5, dpp, tb_name, cv, A, C):
     elif ft == 'xpm':                                       # e.g. hbond map
         xpmf = f
         ndxf = f.replace('.xpm', '.ndx')
-        dpp = utils.get_dpp(cv)
-        io_files = utils.gen_io_files(dpp, cv['id_'])
+        dpp = U.get_dpp(cv)
+        io_files = U.gen_io_files(dpp, cv['id_'])
         grof = io_files['ordergrof']
         flist = [xpmf, ndxf, grof]
         for i in flist:
@@ -139,22 +138,17 @@ def gen_hbond_map(xpm, ndx, grof):
 def init_hdf5(h5, core_vars):
     """ init hdf5 if first time, make sure the directory hierarchy exists in hdf5 """
     filters = tables.Filters(complevel=8, complib='zlib')
-    paths = []
-    for cv in core_vars:
-        PATH_KEY_RE = re.compile('path\d+')
-        paths.append(sorted(
-                [cv[p] for p in cv.keys() if re.match(PATH_KEY_RE, p)],
-                key=lambda x: len(x)))
-
-
-    for path in paths:          # e.g ['w300', 'w300/sq1', 'w300/sq1/00']
-        for p in path:
-            rootp = os.path.join('/', p)
-            dirname = os.path.dirname(rootp)
-            basename = os.path.basename(os.path.join('/', rootp))
-            if not h5.__contains__(rootp):
-                logger.info('creating... {0}'.format(rootp))
+    paths = U.gen_paths_dict(core_vars)
+    depths = sorted(paths.keys())
+    for dp in depths:
+        ps = paths[dp]
+        print ps
+        for p in ps:
+            p = os.path.join('/', p)
+            dirname = os.path.dirname(p)
+            basename = os.path.basename(os.path.join('/', p))
+            if not h5.__contains__(p):
+                logger.info('creating... {0}'.format(p))
                 h5.createGroup(where=dirname, name=basename, filters=filters)
-            # the commented code may have print too much info, which is confusing
-            # else:
-            #     logger.info('{0} Already existed'.format(rootp))
+            else:
+                logger.info('{0} Already existed'.format(p))
