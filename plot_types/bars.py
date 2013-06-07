@@ -34,19 +34,17 @@ def bars(grps, A, C, **kw):
     ax.set_xticks(xlocs + bar_width/2.)                     # /2. to make it in the middle
     ax.grid(which="major", axis='y')
 
-    if 'ylim' in dd:
-        ax.set_ylim(dd['ylim'])
-    if 'xlabel' in dd: 
-        ax.set_xlabel(dd['xlabel'])
-    if 'ylabel' in dd: 
-        ax.set_ylabel(dd['ylabel'], labelpad=10)
+    if 'grid' in dd:   ax.grid(**dd['grid'])
+    if 'xlim' in dd:   ax.set_xlim(**dd['xlim'])
+    if 'ylim' in dd:   ax.set_ylim(**dd['ylim'])
+    if 'xlabel' in dd: ax.set_xlabel(**dd['xlabel'])
+    if 'ylabel' in dd: ax.set_ylabel(**dd['ylabel'])
+    if 'title' in dd:  ax.set_title(**dd['title'])
+    if 'legend' in dd: ax.legend(**dd['legend'])
+
     if 'xticklabels' in dd:
-        ax.set_xticklabels(dd['xticklabels'], rotation=15)
+        ax.set_xticklabels(**dd['xticklabels'])
     else:
         ax.set_xticklabels(grps.keys(), rotation=20)
-    if 'title' in dd:
-        ax.set_title(dd['title'])
-    if 'legend' in dd: 
-        ax.legend(dd['legend'], loc='best')
 
     plt.savefig(utils.gen_output_filename(A, C))

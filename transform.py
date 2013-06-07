@@ -147,13 +147,14 @@ def init_hdf5(h5, core_vars):
                 key=lambda x: len(x)))
 
 
-    for path in paths:
+    for path in paths:          # e.g ['w300', 'w300/sq1', 'w300/sq1/00']
         for p in path:
-            p = os.path.join('/', p)
-            dirname = os.path.dirname(p)
-            basename = os.path.basename(os.path.join('/', p))
-            if not h5.__contains__(p):
-                logger.info('creating... {0}'.format(p))
+            rootp = os.path.join('/', p)
+            dirname = os.path.dirname(rootp)
+            basename = os.path.basename(os.path.join('/', rootp))
+            if not h5.__contains__(rootp):
+                logger.info('creating... {0}'.format(rootp))
                 h5.createGroup(where=dirname, name=basename, filters=filters)
-            else:
-                logger.info('{0} Already existed'.format(p))
+            # the commented code may have print too much info, which is confusing
+            # else:
+            #     logger.info('{0} Already existed'.format(rootp))

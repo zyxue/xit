@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 import utils
 from analysis_methods import PROPERTIES, ANALYSIS_METHODS
 from plot_types import PLOT_TYPES
-from plotmp_types import PLOT2P_TYPES
+from plotmp_types import PLOTMP_TYPES
 
 """Here contains not as basic util functions that need to import import any
 other local xit-specific modules"""
@@ -96,7 +96,7 @@ def get_args(args_to_parse=None):
 
     plotmp_parser = subparsers.add_parser(
         'plotmp', help='similar to plot, but handles two properties at the same time')
-    plotmp_parser.add_argument('--plotmp_type', choices=PLOT2P_TYPES.keys(), help='{0}'.format(PLOT2P_TYPES.keys()))
+    plotmp_parser.add_argument('--plotmp_type', choices=PLOTMP_TYPES.keys(), help='{0}'.format(PLOTMP_TYPES.keys()))
     plotmp_parser.add_argument('-p' , '--properties', nargs='+',
                                help=('added MULTIPLE properties, which is different '
                                      'than a single property in plot. e.g. "upup unun"'))
@@ -112,11 +112,14 @@ def get_args(args_to_parse=None):
         # forget what the following two lines mean ---2013-05-09
         # f is used to add global_args, it does not work with argparse to put
         # --vars in right after argparse.ArgumentParser, which is strange
-        p.add_argument('-v', '--vars', nargs='+', action=convert_vars,
+        p.add_argument('--vars', nargs='+', action=convert_vars,
                        help='list of vars, as defined in the .xit file, command line options override .xit')
         p.add_argument('-g', '--config', default='.xitconfig.yaml', help='specify the config option if not default')
         p.add_argument('--nobackup', action='store_true', help="don't back the file to speed up analysis")
         p.add_argument('--loglevel', default='info', help="don't back the file to speed up analysis")
+        p.add_argument('-v', action='store_true', help="enable verbose output")
+        p.add_argument('--vv', action='store_true', help="enable very verbose output")
+        p.add_argument('--vvv', action='store_true', help="enable very very verbose output")
 
     for p in [anal_parser]:
         p.add_argument('-a' , '--analysis', required=True, help='{0}'.format(ANALYSIS_METHODS.keys()))

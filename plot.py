@@ -1,3 +1,4 @@
+import sys
 import os
 import logging
 logger = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ def plot(A, C, core_vars):
     data = OrderedDict()
     grps = groupit(core_vars, prop_obj, A, C, h5)
     logger.info("Groups: {0}".format(grps.keys()))
+
     calc_fetch_or_overwrite(grps, prop_obj, data, A, C, h5)
 
     func = plot_types.PLOT_TYPES[A.plot_type]
@@ -27,30 +29,47 @@ def plot(A, C, core_vars):
 
 def calc_fetch_or_overwrite(grps, prop_obj, data, A, C, h5):
     """data should be a empty OrderedDict"""
+    CALC_TYPE_MAPPING = utils.reverse_mapping(
+        {(calc_means, 'means'): ['bars', 'grped_bars', 'xy', 'grped_xy', 'grped_along_var', 'mp_grped_along_var'],
+         (calc_alx, 'alx'): ['alx', 'grped_alx', 'mp_alx'],
+         (calc_distr, 'distr'): ['distr', 'grped_distr'],
+         (calc_distr_ave, 'distr_ave'): ['grped_distr_ave'],
+         (calc_map, 'map'): ['map'],
+         (calc_pmf, 'pmf'): ['pmf'],
+         })
+
     for c, gk in enumerate(grps):
-        logger.info('processing Group {0}: {1}'.format(c, gk))
-        
+        if A.v: logger.info('processing Group {0}: {1}'.format(c, gk))
         # ar: array
         for _ in ['plot_type', 'plotmp_type']:
             if hasattr(A, _):
-                pt = getattr(A, _)               # pt: plot_type or plotmp_type
-        ar_name = '{0}_{1}'.format(pt, prop_obj.name)                
+                pt = getattr(A, _) # pt: plot_type or plotmp_type
+                if A.v: logger.info('{0} detected'.format(pt))
+
+        try:
+            calc_type_func, calc_type = CALC_TYPE_MAPPING[pt]
+        except KeyError:
+            print 'Do not know how to calculate "{0}"'.format(pt)
+            sys.exit(255)
+
+        ar_name = '{0}_{1}'.format(calc_type, prop_obj.name)
         ar_where = os.path.join('/', gk)
         ar_whname = os.path.join(ar_where, ar_name)
+        prop_dd = utils.get_prop_dd(C, prop_obj.name)
         if h5.__contains__(ar_whname):
             if not A.overwrite:
-                logger.info('fetching subdata from precalculated result')
+                if A.v: logger.info('fetching subdata from precalculated result')
                 sda = h5.getNode(ar_whname).read()     # sda: subdata
             else:
-                logger.info('overwriting old subdata with new ones')
+                if A.v: logger.info('overwriting old subdata with new ones')
                 _ = h5.getNode(ar_whname)
                 _.remove()
-                ar = calcit(grps[gk], gk, prop_obj, h5, A, C)
+                ar = calc_type_func(h5, gk, grps[gk], prop_obj, prop_dd, A, C)
                 h5.createArray(where=ar_where, name=ar_name, object=ar)
                 sda = ar
         else:
-            logger.info('Calculating subdata...')
-            ar = calcit(grps[gk], gk, prop_obj, h5, A, C)
+            if A.v: logger.info('Calculating subdata...')
+            ar = calc_type_func(h5, gk, grps[gk], prop_obj, prop_dd, A, C)
             if ar.dtype.name != 'object':
                 # cannot be handled by tables yet, but it's fine not to store
                 # it because usually object is a combination of other
@@ -62,30 +81,6 @@ def calc_fetch_or_overwrite(grps, prop_obj, data, A, C, h5):
             sda = ar
         data[gk] = sda
 
-def calcit(grp, gk, prop_obj, h5, A, C):
-    # prop_dd may contain stuffs like denorminators, etc.
-
-    prop_dd = utils.get_prop_dd(C, prop_obj.name)
-    args = [h5, gk, grp, prop_obj, prop_dd, A, C]
-    
-    # the name of pt MUST follow those function names in files in ./plot_types
-    # or .plotmp_types
-    pt = utils.get_pt(A) 
-    if pt in ['bars', 'grped_bars', 'xy', 'grped_xy']:
-        return calc_means(*args)
-    elif pt in ['alx', 'grped_alx', 'mp_alx']:
-        return calc_alx(*args)
-    elif pt in ['distr', 'grped_distr']:
-        return calc_distr(*args)
-    elif pt == 'grped_distr_ave':
-        return calc_distr_ave(*args)
-    elif pt == 'map':
-        return calc_map(grp, prop_obj)
-    elif pt == 'pmf':
-        return calc_pmf(*args)
-    else:
-        raise IOError('Do not know how to calculate "{0}"'.format(pt))
-
 def calc_means(h5, gk, grp, prop_obj, prop_dd, A, C):
     grp_tb = fetch_grp_tb(h5, grp, prop_obj.name)
     _l = []
@@ -94,7 +89,8 @@ def calc_means(h5, gk, grp, prop_obj, prop_dd, A, C):
         _l.append(_)
 
     if 'denorminators' in prop_dd:
-        denorm = float(prop_dd['denorminators'][gk])
+        denorm = float(utils.get_param(prop_dd['denorminators'], gk))
+        logger.info('denormator: {0}'.format(denorm))
         return np.array([np.mean(_l) / denorm, utils.sem(_l) / denorm])
 
     return np.array([np.mean(_l), utils.sem(_l)])

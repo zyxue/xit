@@ -2,6 +2,7 @@ import re
 import logging
 logger = logging.getLogger(__name__)
 from collections import OrderedDict
+import pprint
 
 import matplotlib.pyplot as plt
 
@@ -18,7 +19,7 @@ def grped_distr(data, A, C, **kw):
         }
     """
 
-    logger.info('start plotting {0} for {1}...'.format(A.plot_type, data.keys()))
+    logger.info('start plotting {0} for \n{1}'.format(A.plot_type, pprint.pformat(data.keys())))
 
     # This is trying to avoid duplication in .xitconfig, but not very elegant
     if A.plot_type in ['grped_distr', 'grped_distr_ave']:

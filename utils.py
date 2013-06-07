@@ -87,8 +87,13 @@ def sem3(ar):
             A[i][j]=sem(ar[:,i,j])
     return A
 
-def gen_rc(n):
+def gen_rc(n, pt_dd={}):
     """generate row and column numbers"""
+    if 'ncol_nrow' in pt_dd:
+        ncol, nrow = pt_dd['ncol_nrow']
+        logger.info('found ncol_nrow in config file, # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
+        return ncol, nrow
+
     c = int(np.sqrt(n))
     r = c
     if c * r == n:
@@ -96,9 +101,11 @@ def gen_rc(n):
     else:         # r * c < n                                                  
         r = r + 1
         if r * c < n:
-            return c, r+1, 
+            ncol, nrow = c, r+1, 
         else:
-            return c, r
+            ncol, nrow = c, r
+    logger.info('Chosen # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
+    return ncol, nrow
 
 def split(l, group_size):
     """split a list into n chunks"""
@@ -293,34 +300,35 @@ def gen_output_filename(A, C):
     logger.info('saving to {0} ...'.format(output))
     return output
 
-def get_anal_dd(C, anal_name):
+def get_anal_dd(C, anal_name, fvb=False):
+    """fvb: verbose or not"""
     r = C.get('anal')
     if not r:
-        logger.info('anal NOT found')
+        if fvb: logger.info('anal NOT found')
         return {}
     rr = r.get(anal_name)
     if not rr:
-        logger.info('{0} NOT found under anal')
+        if fvb: logger.info('{0} NOT found under anal')
         return {}
     return rr
 
-def get_prop_dd(C, prop_name):
+def get_prop_dd(C, prop_name, fvb=False):
     """
     get the configuration for a particular property (prop) under the plot section
     of .xitconfig
     """
     r = C.get('plot')
     if not r:
-        logger.info('plot NOT found')
+        if fvb: logger.info('plot NOT found')
         return {}
     rr = r.get(prop_name)
     if not rr:
-        logger.info('"{0}" NOT found under "plot"'.format(prop_name))
+        if fvb: logger.info('"{0}" NOT found under "plot"'.format(prop_name))
         return {}
-    logger.info('found "{0}" under "plot"'.format(prop_name))
+    if fvb: logger.info('found "{0}" under "plot"'.format(prop_name))
     return rr
 
-def get_pt_dd(C, prop_name, pt_name):
+def get_pt_dd(C, prop_name, pt_name, fvb=False):
     """get the configuration for plot type or plotmp type (pt) under the plots
     section of .xitconfig"""
     r = get_prop_dd(C, prop_name)
@@ -330,25 +338,25 @@ def get_pt_dd(C, prop_name, pt_name):
             logger.info('found "{0}" under "{1}"'.format(pt_name, prop_name))
             return rr
         else:
-            logger.info('"{0}" NOT found under "{1}"'.format(pt_name, prop_name))
+            if fvb: logger.info('"{0}" NOT found under "{1}"'.format(pt_name, prop_name))
 
-    logger.info('starting looking into plotmp for "{0}"...'.format(pt_name))
+    if fvb: logger.info('starting looking into plotmp for "{0}"...'.format(pt_name))
     # assumed there will be not name overlap in plot and plotmp sections since
     # in the former, only one property is expected while in the later case, two
     # are.
     s = C.get('plotmp')
     if not s:
-        logger.info('plotmp NOT found')
+        if fvb: logger.info('plotmp NOT found')
         return {}
     ss = s.get(prop_name)
     if not ss:
-        logger.info('"{0}" NOT found under plotmp'.format(prop_name))
+        if fvb: logger.info('"{0}" NOT found under plotmp'.format(prop_name))
         return {}
     sss = ss.get(pt_name)
     if not sss:
-        logger.info('"{0}" NOT found in "{1}"'.format(pt_name, prop_name))
+        if fvb: logger.info('"{0}" NOT found in "{1}"'.format(pt_name, prop_name))
         return {}
-    logger.info('found "{0}" in "{1}"'.format(pt_name, prop_name))
+    if fvb: logger.info('found "{0}" in "{1}"'.format(pt_name, prop_name))
     return sss
 
 def get_prop(A):
@@ -388,8 +396,23 @@ def is_plot_type(f):
     return f
 
 def is_plotmp_type(f):
-    setattr(f, 'IS_PLOT2P_TYPE', 1)
+    setattr(f, 'IS_PLOTMP_TYPE', 1)
     return f
+
+def reverse_mapping(dd):
+    """
+    reverse the mapping in a dict object, e.g. given
+    {key1: [v1, v2], key2: [v3, v4]},
+    return
+    {v1: key1, v2: key1, v3: key2, v4: key2]}.
+    """
+    new_dd = {}
+    for k, v in dd.items():
+        for i in v:
+            if i in new_dd:
+                raise ValueError("Each value in the values (which is a list) in {0} must be unique".format(dd))
+            new_dd[i] = k
+    return new_dd
 
 # def is_transformable(f):
 #     """if IS_TRANSFORMABLE, then can be transformed to a hdf5 file"""
