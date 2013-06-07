@@ -33,8 +33,11 @@ def gen_cmds(A, C, core_vars):
         anal_func = analysis_methods.ANALYSIS_METHODS[A.analysis]
 
         if anal_func.__module__ != analysis_methods.org.__name__:
+            analysis_dir = C['data']['analysis']
+            if not os.path.exists(analysis_dir):
+                os.mkdir(analysis_dir)
             # analysis_methods.org.__name__: 'analysis_methods.org'
-            anal_dir = os.path.join(root, C['data']['analysis'], 'r_{0}'.format(A.analysis))
+            anal_dir = os.path.join(root, analysis_dir, 'r_{0}'.format(A.analysis))
             if not os.path.exists(anal_dir):
                 os.mkdir(anal_dir)
             kw.update(anal_dir=anal_dir)
