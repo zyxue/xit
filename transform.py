@@ -28,6 +28,8 @@ def transform(A, C, core_vars):
 
         tb_name = A.property
         tb_path = os.path.join(dpp, tb_name)
+        schema = prop.Property(A.property).schema,            
+
         if h5.__contains__(tb_path):
             tb = h5.getNode(tb_path)
             if not A.overwrite:
@@ -35,20 +37,19 @@ def transform(A, C, core_vars):
             else:
                 # overwrite with new data
                 tb.remove()
-                tb = put_data(A.filetype, afile, 
-                              prop.Property(A.property).schema,
+                tb = put_data(A.filetype, afile, schema,
                               h5, dpp, tb_name, cv, A, C)
                 if tb:
                     logger.info("{0} is overwritten with new data".format(tb_path))
         else:
             # tb_or_ar: table or array, or None
-            tb_or_ar = put_data(A.filetype, afile, 
-                                prop.Property(A.property).schema,
+            tb_or_ar = put_data(A.filetype, afile, schema,
                                 h5, dpp, tb_name, cv, A, C)
             if tb_or_ar:
                 logger.info("{0} IS TRANSFORMED to {1}".format(afile, tb_path))
 
 def put_data(ft, f, schema, h5, dpp, tb_name, cv, A, C):
+    """dpp: with a slash already"""
     if not os.path.exists(f) and ft != 'dependent':
         logger.info("ATTENTION: {0} doesn't exist! (You may want to consider --filetype dependent)".format(f))
         return
@@ -60,15 +61,24 @@ def put_data(ft, f, schema, h5, dpp, tb_name, cv, A, C):
                             title=fobj.desc)
         tb.append(fobj.data)
         return tb
+
     elif ft == 'xpm':                                       # e.g. hbond map
         xpmf = f
         ndxf = f.replace('.xpm', '.ndx')
-        dpp = U.get_dpp(cv)
-        io_files = U.gen_io_files(dpp, cv['id_'])
-        grof = io_files['ordergrof']
+        io_files = U.gen_io_files(dpp[1:], cv['id_']) # dpp[1:] remove / at the beginning
+        f_gro_exist = False
+        for _ in ['ordergrof', 'grof', 'progrof']:
+            if os.path.exists(io_files[_]):
+                grof = io_files[_]
+                f_gro_exist = True
+
+        if not f_gro_exist:
+            raise IOError("Cannot find usable gro file")
+
         flist = [xpmf, ndxf, grof]
         for i in flist:
-            assert os.path.exists(i) == True
+            if not os.path.exists(i):
+                raise IOError("{0} doesn't exist".format(i))
         hb_map = gen_hbond_map(*flist)                      # hb_map: hbond map
         ar = h5.createArray(where=dpp, name=tb_name, object=hb_map)
         return ar

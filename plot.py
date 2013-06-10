@@ -34,7 +34,7 @@ def calc_fetch_or_overwrite(grps, prop_obj, data, A, C, h5):
          (calc_alx, 'alx'): ['alx', 'grped_alx', 'mp_alx'],
          (calc_distr, 'distr'): ['distr', 'grped_distr'],
          (calc_distr_ave, 'distr_ave'): ['grped_distr_ave'],
-         (calc_map, 'map'): ['map'],
+         (calc_imap, 'imap'): ['imap'],
          (calc_pmf, 'pmf'): ['pmf'],
          })
 
@@ -168,13 +168,15 @@ def calc_alx(h5, gk, grp, prop_obj, prop_dd, A, C):
     res = block_average(_aa, n)
     return res
 
-def calc_map(grp, prop_obj):
+def calc_imap(h5, gk, grp, prop_obj, prop_dd, A, C):
+    grp_tb = fetch_grp_tb(h5, grp, prop_obj.name)
     _l = []
-    for tb in grp:                              # it could be array
+    for tb in grp_tb:                              # it could be array
         _l.append(tb)
+        print tb
     # no need to normalize when plotting a map!
-    # norm  = prop_obj.norm('sq1') # dirty
-    return np.array(_l).mean(axis=0)
+    res = np.array(_l).mean(axis=0)
+    return res
 
 def calc_pmf(h5, gk, grp, prop_obj, prop_dd, A, C):
     pt_dd = utils.get_pt_dd(C, A.property, A.plot_type)

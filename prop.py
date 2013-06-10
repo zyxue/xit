@@ -270,11 +270,13 @@ INTERESTED_FIELDS = {
 from mysys import read_mysys
 mysys = read_mysys.read()
 
+NO_SCHEMA = ['upup_map']
+
 class Property(object):
     def __init__(self, pn):                                 # p: property name
         """values of d contain two parts: the table class & its description"""
         self.name = pn
-        self.schema = SCHEMA_DICT[pn]
+        self.schema = None if pn in NO_SCHEMA else SCHEMA_DICT[pn]
         if pn in INTERESTED_FIELDS.keys():
             self.ifield = INTERESTED_FIELDS[pn]
 

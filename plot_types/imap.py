@@ -1,4 +1,6 @@
 import os
+import logging
+logger = logging.getLogger(__name__)
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -6,23 +8,25 @@ import numpy as np
 
 from mpl_toolkits.axes_grid1 import ImageGrid
 
-import utils
+import utils as U
 
 matplotlib.rcParams['xtick.direction'] = 'out' 
 matplotlib.rcParams['ytick.direction'] = 'out' 
 
-def map_(data, A, C, **kw):
-    print 'start plotting map'
+@U.is_plot_type
+def imap(data, A, C, **kw):
+    """imap: interaction map"""
+    logger.info('start plotting interaction map...')
 
     fig = plt.figure(figsize=(12,9))
-    col, row = utils.gen_rc(len(data.keys()))
+    col, row = U.gen_rc(len(data.keys()))
     col, row = row, col
     grid = ImageGrid(fig, 111, nrows_ncols = (row, col), 
                      axes_pad = 0.3, 
                      add_all=True, label_mode = "L")
 
-    print 'col: {0}, row; {1}'.format(col, row)
-    D = C['plot'][A.analysis][A.plot_type]
+    pt_dd = U.get_pt_dd(C, A.property, A.plot_type)
+
     normalize(data)
     max_ = get_max(data)
     for k, gk in enumerate(data.keys()):
@@ -44,19 +48,10 @@ def map_(data, A, C, **kw):
         im.set_clim(0, max_)
 
         ax.minorticks_on()
-        # ax.grid(which='major')
-
-        if 'xlabel' in D: ax.set_xlabel(D['xlabel'])
-        if 'ylabel' in D: ax.set_ylabel(D['ylabel'])
-        ax.set_title(C['legends'][gk])
+        decorate_ax(ax, pt_dd, gk)
 
     plt.colorbar(im, shrink=.5, orientation='vertical', anchor=(1.3, 0))
-    if A.output:
-        plt.savefig(A.output)
-    else:
-        plt.savefig(os.path.join(
-                C['data']['plots'], 
-                '{0}.png'.format('_'.join([A.plot_type, A.analysis]))))
+    plt.savefig(U.gen_output_filename(A, C))
 
 def get_max(data):
     max_ = []
@@ -67,3 +62,12 @@ def get_max(data):
 def normalize(data):
     for i in data:
         data[i] = data[i] / np.sum(data[i])
+
+def decorate_ax(ax, pt_dd, gk):
+    if 'xlabel' in pt_dd: ax.set_xlabel(pt_dd['xlabel'])
+    if 'ylabel' in pt_dd: ax.set_ylabel(pt_dd['ylabel'])
+    
+    if 'titles' in pt_dd:
+        ax.set_title(U.get_param(pt_dd['titles'], gk))
+    else:
+        ax.set_title(gk)

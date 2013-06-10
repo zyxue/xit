@@ -3,15 +3,15 @@ logger = logging.getLogger(__name__)
 
 import matplotlib.pyplot as plt
 
-import utils
+import utils as U
 
-@utils.is_plot_type
+@U.is_plot_type
 def distr(data, A, C, **kw):
     """data: is an OrderedDict"""
     logger.info('start plotting distr...')
 
     fig = plt.figure(figsize=(12,9))
-    pt_dd = utils.get_pt_dd(C, A.property, A.plot_type)
+    pt_dd = U.get_pt_dd(C, A.property, A.plot_type)
     if A.merge:
         ax = fig.add_subplot(111)
         for c, gk in enumerate(data.keys()):
@@ -23,7 +23,7 @@ def distr(data, A, C, **kw):
                             where=None, facecolor=params.get('color'), alpha=.3)
         decorate_ax(ax, pt_dd)
     else:
-        col, row = utils.gen_rc(len(data.keys()))
+        col, row = U.gen_rc(len(data.keys()))
         logger.info('col: {0}, row; {1}'.format(col, row))
         for c, gk in enumerate(data.keys()):
             ax = fig.add_subplot(row, col, c+1)
@@ -36,14 +36,14 @@ def distr(data, A, C, **kw):
 
             decorate_ax(ax, pt_dd)
 
-    plt.savefig(utils.gen_output_filename(A, C))
+    plt.savefig(U.gen_output_filename(A, C))
 
 def get_params(gk, pt_dd):
     params = {}
     if 'colors' in pt_dd:
-        params['color'] = utils.get_param(pt_dd['colors'], gk)
+        params['color'] = U.get_param(pt_dd['colors'], gk)
     if 'legends' in pt_dd:
-        params['label'] = utils.get_param(pt_dd['legends'], gk)
+        params['label'] = U.get_param(pt_dd['legends'], gk)
     else:
         params['label'] = gk
     return params

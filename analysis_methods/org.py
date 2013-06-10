@@ -79,12 +79,8 @@ def trjcat_plus(**kw):
         )
     xtcfs = [xtcf for xtcf in xtcfs if re.search(RE, xtcf)]
     kw.update(dict(fmt_xtcfs=' '.join(xtcfs)))
-    cmd = 'trjcat+.py -f {fmt_xtcfs} -s {tprf} -o {xtcf}'.format(**kw)
-    return cmd
-
-def trjconv_grof(**kw):                  # used to extract the last frame
-    # The protein in gro is centered!
-    return "printf 'Protein\nsystem\n' | trjconv \
+    cmd1 = 'trjcat+.py -f {fmt_xtcfs} -s {tprf} -o {xtcf}'.format(**kw)
+    cmd2 = "printf 'Protein\nsystem\n' | trjconv \
 -f {xtcf} \
 -s {tprf} \
 -pbc mol \
@@ -93,24 +89,25 @@ def trjconv_grof(**kw):                  # used to extract the last frame
 -ur tric \
 -dump 0 \
 -o {grof}".format(**kw)
+    return cmd1 + ';' + cmd2
 
-def trjconv_proxtcf(**kw):
-    return "printf 'Protein\nProtein\n' | trjconv \
+def trjconv_pro(**kw):
+    cmd1 = "printf 'Protein\nProtein\n' | trjconv \
 -f {xtcf} \
 -s {tprf} \
 -pbc mol \
 -center \
 -b {b} \
 -o {proxtcf}".format(**kw)
-
-def trjconv_progrof(**kw):
-    return """printf 'Protein\nProtein\n' | trjconv \
+    cmd2 = "printf 'Protein\nProtein\n' | trjconv \
 -f {xtcf} \
 -s {tprf} \
 -pbc mol \
 -center \
 -dump 0 \
--o {progrof}""".format(**kw)
+-o {progrof}".format(**kw)
+
+    return cmd1 + ';' + cmd2
 
 def get_tpr_time(tprfile):
     proc = subprocess.Popen(['gmxdump', '-s', tprfile],
