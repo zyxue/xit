@@ -9,6 +9,7 @@ import Queue
 from threading import Thread
 from collections import OrderedDict
 from functools import update_wrapper
+from jinja2 import Template
 
 import tables
 import numpy as np
@@ -267,12 +268,6 @@ def runit(cmd_logf_generator, numthread, ftest):
     
     q.join()
 
-def get_dpp(cv):        # get deepest path, e.g. w300/sq1/00
-    PATH_KEY_RE = re.compile('path\d+')
-    dpk = max([p for p in cv.keys() if re.match(PATH_KEY_RE, p)], 
-              key=lambda x: int(x[4:]))
-    return cv[dpk]
-
 def get_h5(A, C):
     if A.hdf5:
         hdf5 = A.hdf5
@@ -437,8 +432,28 @@ def gen_paths_dict(core_vars):
                     paths[depth] = set([path])
     return paths
 
+def get_dpp(cv):        # get deepest path, e.g. w300/sq1/00
+    PATH_KEY_RE = re.compile('path\d+')
+    dpk = max([p for p in cv.keys() if re.match(PATH_KEY_RE, p)], 
+              key=lambda x: int(x[4:]))
+    return cv[dpk]
 
-# def is_transformable(f):
-#     """if IS_TRANSFORMABLE, then can be transformed to a hdf5 file"""
-#     setattr(f, 'IS_TRANSFORMABLE', 1)
-#     return f
+def template(tmpl, **kwargs):
+    """
+    use jinja2 for templating to avoid confuson of ${var} in shell-script file
+    """
+    s = Template(tmpl)
+    s2 = s.render(kwargs)
+    return s2
+
+def template_file(infile, opfile, **kwargs):
+    """
+    infile: input file
+    opfile: output file
+    """
+    inf = open(infile)
+    opf = open(opfile, 'w')
+    s = ''.join(inf.readlines())
+    s2 = template(s, **kwargs)
+    opf.write(s2)
+    logger.info('templated {0} {1}'.format(infile, opfile))
