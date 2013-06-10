@@ -36,7 +36,7 @@ def g_select(**kw):
     gss  = dd['gss'].get('const') + dd['gss'][gssk]                   # gss: g_select selction
     if os.path.exists(kw['ordergrof']):
         thegrof = kw['ordergrof']
-        thetprf = kw['tprf']
+        thetprf = kw['ordergrof']
     else:
         if kw['use_pro']:
             thegrof = kw['progrof']
