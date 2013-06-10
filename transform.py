@@ -28,7 +28,7 @@ def transform(A, C, core_vars):
 
         tb_name = A.property
         tb_path = os.path.join(dpp, tb_name)
-        schema = prop.Property(A.property).schema,            
+        schema = prop.Property(A.property).schema
 
         if h5.__contains__(tb_path):
             tb = h5.getNode(tb_path)
