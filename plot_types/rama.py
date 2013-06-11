@@ -23,11 +23,8 @@ def rama(data, A, C, **kw):
         ax = fig.add_subplot(row, col, c+1)
         da = data[gk]
 
-        phis, psis = da
-        print phis
-        print psis
-        # h, phip, psip = np.histogram2d(phis, psis, range=[[-180,180], [-180,180]], bins=36)
-        h, phip, psip = np.histogram2d(phis, psis, bins=36)
+        psis, phis = da # the order of phi, psi produced by g_rama is probably wrong. --2013-06-11
+        h, phip, psip = np.histogram2d(phis, psis, range=[[-180,180], [-180,180]], bins=36)
         phip = (phip[1:] + phip[:-1]) / 2.
         psip = (psip[1:] + psip[:-1]) / 2.
         contour = ax.contourf(phip, psip, h, cmap=cm.gray_r)
