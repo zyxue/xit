@@ -21,7 +21,6 @@ def rama(data, A, C, **kw):
 
     bins = pt_dd.get('bins', 36)
     normed = pt_dd.get('normed', False)
-    print normed
     for c, gk in enumerate(data.keys()):
         ax = fig.add_subplot(row, col, c+1)
         da = data[gk]
@@ -48,6 +47,7 @@ def rama(data, A, C, **kw):
     #     bins = np.linspace(_la.min(), _la.max(), 36)
 
 def decorate_ax(ax, pt_dd, gk, A):
+    if 'grid' in pt_dd:   ax.grid(**pt_dd['grid'])
     if 'xlabel' in pt_dd: ax.set_xlabel(pt_dd['xlabel'])
     if 'ylabel' in pt_dd: ax.set_ylabel(pt_dd['ylabel'])
     
