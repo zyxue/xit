@@ -19,6 +19,9 @@ def rama(data, A, C, **kw):
     fig = plt.figure(figsize=(col*6, row*6))
     pt_dd = U.get_pt_dd(C, A.property, A.plot_type)
 
+    bins = pt_dd.get('bins', 36)
+    normed = pt_dd.get('normed', False)
+    print normed
     for c, gk in enumerate(data.keys()):
         ax = fig.add_subplot(row, col, c+1)
         da = data[gk]
@@ -26,14 +29,15 @@ def rama(data, A, C, **kw):
         # the order of phi, psi produced by g_rama is probably
         # wrong. --2013-06-11
         psis, phis = da
-        h, phip, psip = np.histogram2d(phis, psis, range=[[-180,180], [-180,180]], bins=36)
+        h, phip, psip = np.histogram2d(phis, psis, range=[[-180,180], [-180,180]], 
+                                       bins=bins, normed=normed)
         phip = (phip[1:] + phip[:-1]) / 2.
         psip = (psip[1:] + psip[:-1]) / 2.
         contour = ax.contourf(phip, psip, h, cmap=cm.gray_r)
     
         decorate_ax(ax, pt_dd, gk, A)
+        # plt.colorbar(contour, shrink=0.6, extend='both')
 
-    # plt.colorbar(contour, shrink=0.6, extend='both')
     plt.savefig(U.gen_output_filename(A, C))
 
     # if 'bins' in pt_dd:
