@@ -1,6 +1,15 @@
 import os
 import utils
 
+def rama(**kw):
+    # g_rama only take tpr file
+    thextcf = kw['proxtcf'] if kw['use_pro'] else kw['orderxtcf']
+    return "g_rama \
+-f {thextcf} \
+-s {tprf} \
+-b {b} \
+-o {anal_dir}/{id_}_rama.xvg".format(thextcf=thextcf, **kw)
+
 def seqspacing(**kw):
     dd = utils.get_anal_dd(kw['C'], 'seqspacing')
     plk = dd['plk_fmt'].format(**kw)

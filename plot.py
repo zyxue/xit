@@ -36,6 +36,11 @@ def calc_fetch_or_overwrite(grps, prop_obj, data, A, C, h5):
          (calc_distr_ave, 'distr_ave'): ['grped_distr_ave'],
          (calc_imap, 'imap'): ['imap'],
          (calc_pmf, 'pmf'): ['pmf'],
+
+         # rama cannot be calculated and stored because the result dtype would
+         # be object, and their shape would be of different dimensions,
+         # .e.g. np.array([h, phip, psip]).shape: (10, 10) (10,) (10,)
+         (get_rama, 'rama'): ['rama'],
          })
 
     for c, gk in enumerate(grps):
@@ -173,9 +178,26 @@ def calc_imap(h5, gk, grp, prop_obj, prop_dd, A, C):
     _l = []
     for tb in grp_tb:                              # it could be array
         _l.append(tb)
-        print tb
     # no need to normalize when plotting a map!
     res = np.array(_l).mean(axis=0)
+    return res
+
+def get_rama(h5, gk, grp, prop_obj, prop_dd, A, C):
+    grp_tb = fetch_grp_tb(h5, grp, prop_obj.name)
+
+    phis, psis, = [], []
+    for tb in grp_tb:
+        fn1 = tb._f_getAttr('FIELD_0_NAME')
+        fn2 = tb._f_getAttr('FIELD_1_NAME')
+        assert fn1 == 'phi'
+        assert fn2 == 'psi'
+        phi = tb.read(field=fn1)
+        psi = tb.read(field=fn2)
+        phis.extend(phi)
+        psis.extend(psi)
+
+    res = np.array([phis, psis])
+    print res.shape, res.dtype
     return res
 
 def calc_pmf(h5, gk, grp, prop_obj, prop_dd, A, C):
@@ -221,7 +243,6 @@ def prob2pmf(p, max_p, e=None):
         return pmf, pmf_e
     else:
         return pmf
-
 
 def fetch_grp_tb(h5, grp, prop_name):
     """fetch tbs bashed on where values in grp"""

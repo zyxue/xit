@@ -188,7 +188,13 @@ SCHEMA_DICT = {
     'dssp_S': dssp,                  # dssp_S (Bend)
     'dssp_X': dssp,                  # dssp_X (Bend)
 
-    # 'rama': (rama, "dihedral angle distribution for each frame along the time trjectory"),
+    'rama': rama,
+    'rama_GLY': rama,
+    'rama_VAL': rama,
+    'rama_PRO': rama,
+    'rama_ALA': rama,
+
+
     'upup': upup,
     # 'upun': upun,
     'unun': unun,
@@ -280,17 +286,17 @@ class Property(object):
         if pn in INTERESTED_FIELDS.keys():
             self.ifield = INTERESTED_FIELDS[pn]
 
-    def norm(self, x):
-        # x could be sq1, sq2; w, m, etc. depending on mysys
-        # THIS design is ugly and not very useful
-        if self.name in ['rg_c_alpha', 'rg_wl']:
-            return 1
-        elif self.name in ['upup', 'upup_map']:
-            return mysys[x].hbg
-        elif self.name == 'unun':
-            return mysys[x].scnpg
-        else:
-            raise ValueError("unknown norm for analysis: {0}".format(x))
+    # def norm(self, x):
+    #     # x could be sq1, sq2; w, m, etc. depending on mysys
+    #     # THIS design is ugly and not very useful
+    #     if self.name in ['rg_c_alpha', 'rg_wl']:
+    #         return 1
+    #     elif self.name in ['upup', 'upup_map']:
+    #         return mysys[x].hbg
+    #     elif self.name == 'unun':
+    #         return mysys[x].scnpg
+    #     else:
+    #         raise ValueError("unknown norm for analysis: {0}".format(x))
 
 if __name__ == "__main__":
     a = e2ed

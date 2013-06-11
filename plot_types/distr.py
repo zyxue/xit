@@ -24,7 +24,6 @@ def distr(data, A, C, **kw):
         decorate_ax(ax, pt_dd)
     else:
         col, row = U.gen_rc(len(data.keys()))
-        logger.info('col: {0}, row; {1}'.format(col, row))
         for c, gk in enumerate(data.keys()):
             ax = fig.add_subplot(row, col, c+1)
             da = data[gk]
