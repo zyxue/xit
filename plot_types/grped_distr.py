@@ -30,9 +30,7 @@ def grped_distr(data, A, C, **kw):
 
     dsets = grp_datasets(data,  pt_dd)
 
-    figsize = tuple([float(i) for i in pt_dd.get('figsize', (12,9))])
-    fig = plt.figure(figsize=figsize)
-
+    fig = plt.figure(figsize=pt_dd.get('figsize', (12,9)))
     if 'subplots_adjust' in pt_dd:
         fig.subplots_adjust(**pt_dd['subplots_adjust'])
 
