@@ -60,9 +60,9 @@ def grped_distr(data, A, C, **kw):
                 # now, plot the vertical bar showing the average value
                 m = da[1][0]    # mean
                 e = da[1][1]    # error
-                ax.plot([m,m], [0,1], color='black')
+                ax.plot([m,m], [0,1], color=params.get('color'))
                 ax.fill_betweenx([0,1], [m-e, m-e], [m+e, m+e],
-                                 where=None, facecolor='black', alpha=.3)
+                                 where=None, facecolor=params.get('color'), alpha=.3)
 
         # plot a vertical line if needed, e.g. showing the time of convergence
         if 'vline' in pt_dd:
