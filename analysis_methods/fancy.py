@@ -24,6 +24,16 @@ def seqspacing(**kw):
 -o {anal_dir}/{id_}_seqspacing.xvg".format(thextcf=thextcf, thegrof=thegrof, 
                                            peptide_length=pl, **kw)
 
+def omega(**kw):
+    thextcf = kw['proxtcf'] if kw['use_pro'] else kw['orderxtcf']
+    thegrof = kw['proxtcf'] if kw['use_pro'] else kw['ordergrof']
+    return "calc_omega.py \
+-f {thextcf} \
+-s {thegrof} \
+-b {b} \
+-e {e} \
+-o {anal_dir}/{id_}_omega.xvg".format(thextcf=thextcf, thegrof=thegrof, **kw)
+
 def conf_entropy(**kw):
     dd = utils.get_prop_dd(kw['C'], 'conf_entropy')
     # tmp_dir is for storing the covar_e[0-9].* directories and files in it

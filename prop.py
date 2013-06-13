@@ -53,6 +53,22 @@ class omega_percent(tables.IsDescription):
     trans_y_x = tables.Float32Col(pos=3)
     cis_y_x = tables.Float32Col(pos=4)
 
+class omega_x_pro_percent(tables.IsDescription):
+    """
+    percentage of: cis trans peptide bonds
+    """
+    replica_id  = tables.StringCol(itemsize=10, pos=0)
+    trans_x_pro = tables.Float32Col(pos=1)
+    cis_x_pro = tables.Float32Col(pos=2)
+
+class omega_x_y_percent(tables.IsDescription):
+    """
+    percentage of: cis trans peptide bonds
+    """
+    replica_id  = tables.StringCol(itemsize=10, pos=0)
+    trans_y_x = tables.Float32Col(pos=1)
+    cis_y_x = tables.Float32Col(pos=2)
+
 class dssp(tables.IsDescription):
     """
     # This table must be redesigned and do_dssp program modified if you want to
@@ -174,9 +190,11 @@ SCHEMA_DICT = {
     # 'rg_c_alpha'     : (rg, "rg"),       # Radius of gyration of C alpha along the time trjectory
     # 'rg_backbone'    : (rg, "rg"),       # Radius of gyration of backbone along the time trjectory
 
-    'seqspacing'     : seqspacing,                          # sequence spacing
-    'pmf_e2ed'       : pmf,                        # potential_of_mean_force along e2ed
-    # 'omega_percent': (omega_percent, 'percentage of cis trans peptide bonds'),
+    'seqspacing'     : seqspacing,    # sequence spacing
+    'pmf_e2ed'       : pmf,           # potential_of_mean_force along e2ed
+    'omega_percent'  : omega_percent, # percentage of cis trans peptide bonds
+    'omega_x_pro_percent': omega_x_pro_percent,
+    'omega_x_y_percent': omega_x_y_percent,
     
     'dssp_E': dssp,                  # dssp_E (b-sheet)
     'dssp_H': dssp,                  # dssp_H (alpha-helix)

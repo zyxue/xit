@@ -67,7 +67,7 @@ def get_args(args_to_parse=None):
     anal_parser.add_argument('--test', action='store_true', help='if test, print the cmd without executing it')
     anal_parser.add_argument('--nolog', action='store_true', help='disable logging, output to stdout')
     anal_parser.add_argument('-b', default=0, help='gromacs -b')
-    anal_parser.add_argument('-e', default=None, help='gromacs -e')
+    anal_parser.add_argument('-e', default=-1, help='gromacs -e')
     anal_parser.add_argument('--use_pro', action='store_true', 
                              help=("use proxtcf instead of orderxtcf for quick analysis, "
                                    "especially when the later hasn't been generated"))

@@ -24,7 +24,7 @@ def grped_bars(data, A, C, **kw):
     spacing = pt_dd.get('spacing', 0.35)
 
     xlocs = np.arange(0, nclusters * (cluster_width + spacing), cluster_width + spacing)
-    print xlocs
+    logger.info('xlocs: {0}'.format(xlocs))
 
     fig = plt.figure()
     ax = fig.add_subplot(111)

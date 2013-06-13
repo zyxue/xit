@@ -26,6 +26,7 @@ def grped_distr(data, A, C, **kw):
         _ = 'grped_distr'
     elif A.plot_type in ['grped_alx']:
         _ = 'grped_alx'
+
     pt_dd = utils.get_pt_dd(C, A.property, _)
 
     dsets = grp_datasets(data,  pt_dd)
@@ -47,8 +48,8 @@ def grped_distr(data, A, C, **kw):
             if A.plot_type in ['grped_distr', 'grped_alx']:
                 ax.plot(da[0], da[1], **params)
                 # facecolor uses the same color as ax.plot
-                # ax.fill_between(da[0], da[1]-da[2], da[1]+da[2], 
-                #                 where=None, facecolor=params.get('color'), alpha=.3)
+                ax.fill_between(da[0], da[1]-da[2], da[1]+da[2], 
+                                where=None, facecolor=params.get('color'), alpha=.3)
             elif A.plot_type == 'grped_distr_ave':
                 # the data slicing can be confusing, refer to plot.py to see how to
                 # data is structured

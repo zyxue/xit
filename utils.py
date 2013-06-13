@@ -90,8 +90,10 @@ def sem3(ar):
 
 def gen_rc(n, pt_dd={}):
     """generate row and column numbers"""
+    print pt_dd
     if 'ncol_nrow' in pt_dd:
         ncol, nrow = pt_dd['ncol_nrow']
+        print ncol, nrow
         logger.info('found ncol_nrow in config file, # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
         return ncol, nrow
 

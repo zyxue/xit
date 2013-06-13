@@ -36,6 +36,7 @@ def calc_fetch_or_overwrite(grps, prop_obj, data, A, C, h5):
          (calc_distr_ave, 'distr_ave'): ['grped_distr_ave'],
          (calc_imap, 'imap'): ['imap'],
          (calc_pmf, 'pmf'): ['pmf'],
+         (calc_omega_distr, 'omega_distr'): ['grped_omega_distr'],
 
          # rama cannot be calculated and stored because the result dtype would
          # be object, and their shape would be of different dimensions,
@@ -99,6 +100,15 @@ def calc_means(h5, gk, grp, prop_obj, prop_dd, A, C):
         return np.array([np.mean(_l) / denorm, utils.sem(_l) / denorm])
 
     return np.array([np.mean(_l), utils.sem(_l)])
+
+def calc_omega_distr(h5, gk, grp, prop_obj, prop_dd, A, C):
+    """This type of calcuation is still very limited, only to cis x_pro, x_y omega -2012-06-12"""
+    grp_tb = fetch_grp_tb(h5, grp, prop_obj.name)
+    data = []
+    for tb in grp_tb:
+        # field 2 is cis
+        data.append(tb.read(field=tb._f_getAttr('FIELD_2_NAME'))[0])
+    return np.array(data)
 
 def calc_distr(h5, gk, grp, prop_obj, prop_dd, A, C):
     grp_tb = fetch_grp_tb(h5, grp, prop_obj.name)
