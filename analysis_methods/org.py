@@ -135,3 +135,13 @@ def get_tpr_time(tprfile):
             return "{0} not exist".format(tprfile)
         else:
             return "{0} is corrupted".format(tprfile)
+
+def symlink_md2pro(**kw):
+    """useful for simulations in vacuo"""
+    proxtcf = kw['proxtcf']
+    dirname = os.path.dirname(proxtcf)
+    relxtcf = os.path.relpath(kw['xtcf'], dirname)
+    progrof = kw['progrof']
+    relprof = os.path.relpath(kw['grof'], dirname)
+    return "ln -sfv {relxtcf} {proxtcf}; ln -sfv {relprof} {progrof}".format(
+        relxtcf=relxtcf, proxtcf=proxtcf, relprof=relprof, progrof=progrof)

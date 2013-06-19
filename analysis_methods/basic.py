@@ -42,13 +42,14 @@ def e2ed(**kw):
 
     # Since my analysis is all based on orderxtcf, using g_dist would be good,
     # there is not problem concerning PBC any more.
-
+    thextcf = kw['proxtcf'] if kw['use_pro'] else kw['orderxtcf']
+    # seems g_dist only takes tprf
     return 'printf "N_ter\nC_ter\n" | g_dist \
--f {orderxtcf} \
+-f {thextcf} \
 -s {tprf} \
 -b {b} \
 -n {ndxf} \
--o {anal_dir}/{id_}_e2ed.xvg'.format(**kw)
+-o {anal_dir}/{id_}_e2ed.xvg'.format(thextcf=thextcf, **kw)
 
 # def e2ed_wl(**kw):
 #     return 'printf 'N_ter\nC_ter\n' | g_dist \

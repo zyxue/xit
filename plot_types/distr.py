@@ -2,16 +2,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.optimize import curve_fit
+from scipy.stats import pearsonr
 
 import utils as U
+from plot_types.pmf import calc_r2
 
 @U.is_plot_type
 def distr(data, A, C, **kw):
     """data: is an OrderedDict"""
     logger.info('start plotting distr...')
 
-    fig = plt.figure(figsize=(12,9))
     pt_dd = U.get_pt_dd(C, A.property, A.plot_type)
+    fig = plt.figure(figsize=pt_dd.get('figsize', (12,9)))
     if A.merge:
         ax = fig.add_subplot(111)
         for c, gk in enumerate(data.keys()):
@@ -23,16 +27,31 @@ def distr(data, A, C, **kw):
                             where=None, facecolor=params.get('color'), alpha=.3)
         decorate_ax(ax, pt_dd)
     else:
-        col, row = U.gen_rc(len(data.keys()))
+        col, row = U.gen_rc(len(data.keys()), pt_dd)
         for c, gk in enumerate(data.keys()):
             ax = fig.add_subplot(row, col, c+1)
             da = data[gk]
             params = get_params(gk, pt_dd)
             # ax.errorbar(da[0], da[1], yerr=da[2], **params)
-            ax.plot(da[0], da[1], **params)
-            ax.fill_between(da[0], da[1]-da[2], da[1]+da[2], 
+            xs, ys, es = da[0], da[1], da[2] # es: errors
+            ax.plot(xs, ys, **params)
+            ax.fill_between(xs, ys-es, ys+es, 
                             where=None, facecolor=params.get('color'), alpha=.3)
 
+            # do a gaussian fit
+            if pt_dd.get('gaussian_fit'):
+                # maybe it's better to use p0 for curve_fit
+                popt, pcov = curve_fit(gaussian, xs, ys)
+                _, mu, sigma = popt
+                logger.info('mean of the fitted normal distribution: {0}'.format(mu))
+                new_ys = gaussian(xs, *popt)
+                # pearsonr creates different value from that by calc_r2
+                # corr, p_val = pearsonr(ys, new_ys)
+                r2 = calc_r2(ys, new_ys)
+                ax.plot(xs, new_ys, linewidth="4", 
+                        color=params.get('color'), 
+                        label='r^2 = {0:.2f}'.format(r2))
+                
             decorate_ax(ax, pt_dd)
 
     plt.savefig(U.gen_output_filename(A, C))
@@ -41,8 +60,8 @@ def get_params(gk, pt_dd):
     params = {}
     if 'colors' in pt_dd:
         params['color'] = U.get_param(pt_dd['colors'], gk)
-    if 'legends' in pt_dd:
-        params['label'] = U.get_param(pt_dd['legends'], gk)
+    if 'labels' in pt_dd:
+        params['label'] = U.get_param(pt_dd['labels'], gk)
     else:
         params['label'] = gk
     return params
@@ -54,8 +73,12 @@ def decorate_ax(ax, pt_dd):
     if 'xlabel' in pt_dd: ax.set_xlabel(**pt_dd['xlabel'])
     if 'ylabel' in pt_dd: ax.set_ylabel(**pt_dd['ylabel'])
     if 'xscale' in pt_dd: ax.set_xscale(**pt_dd['xscale'])
-    if 'legend' in pt_dd: ax.legend(**pt_dd['legend'])
+    if 'legend' in pt_dd: 
+        ax.legend(**pt_dd['legend'])
+    else:
+        ax.legend(loc='best')
 
-    # if 'legend_linewidth' in pt_dd:
-    #     for l in leg.legendHandles:
-    #         l.set_linewidth(float(pt_dd['legend_linewidth']))
+def gaussian(x, A, mu, sigma):
+    # A helps adjust the normalization
+    return A * np.exp(-(x - mu)**2 / (2 * sigma**2))
+

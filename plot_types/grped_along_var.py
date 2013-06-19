@@ -30,7 +30,7 @@ def ax_plot(ax, dsets, pt_dd, A):
         stds  = np.array([dset[kk][1] for kk in dset.keys()])
         params = get_params(dsetk, pt_dd)
         if A.v: logger.info('params for {0}: {1}'.format(dsetk, params))
-        xs = range(len(dset.keys()))
+        xs = pt_dd.get('xs', range(len(dset.keys())))
         ax.plot(xs, means, **params)
         ax.fill_between(xs, means-stds, means+stds,
                         where=None, facecolor=params.get('color'), alpha=0.3)

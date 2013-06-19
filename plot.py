@@ -30,7 +30,8 @@ def plot(A, C, core_vars):
 def calc_fetch_or_overwrite(grps, prop_obj, data, A, C, h5):
     """data should be a empty OrderedDict"""
     CALC_TYPE_MAPPING = utils.reverse_mapping(
-        {(calc_means, 'means'): ['bars', 'grped_bars', 'xy', 'grped_xy', 'grped_along_var', 'mp_grped_along_var'],
+        {(calc_means, 'means'): ['bars', 'grped_bars', 'xy', 'grped_xy', 
+                                 'grped_along_var', 'mp_grped_along_var', 'grped_along_var_2prop'],
          (calc_alx, 'alx'): ['alx', 'grped_alx', 'mp_alx'],
          (calc_distr, 'distr'): ['distr', 'grped_distr'],
          (calc_distr_ave, 'distr_ave'): ['grped_distr_ave'],
@@ -95,6 +96,7 @@ def calc_means(h5, gk, grp, prop_obj, prop_dd, A, C):
         _l.append(_)
 
     if 'denorminators' in prop_dd:
+        print utils.get_param(prop_dd['denorminators'], gk)
         denorm = float(utils.get_param(prop_dd['denorminators'], gk))
         logger.info('denormator: {0}'.format(denorm))
         return np.array([np.mean(_l) / denorm, utils.sem(_l) / denorm])
@@ -133,8 +135,10 @@ def calc_distr(h5, gk, grp, prop_obj, prop_dd, A, C):
 
     ps = []                             # probability distributions for each tb
     for _ in _la:
-        p, _ = np.histogram(_, bins, normed=False)          # probability
-        p = p / float(sum(p))
+        fnormed = pt_dd.get('normed', False)
+        p, __ = np.histogram(_, bins, normed=fnormed) 
+        if not fnormed:
+            p = p / float(sum(p)) # unnormed probability
         ps.append(p)
     ps = np.array(ps)
 
