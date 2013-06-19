@@ -291,8 +291,8 @@ INTERESTED_FIELDS = {
 
     }
 
-from mysys import read_mysys
-mysys = read_mysys.read()
+# from mysys import read_mysys
+# mysys = read_mysys.read()
 
 NO_SCHEMA = ['upup_map']
 
