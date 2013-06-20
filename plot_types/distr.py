@@ -67,7 +67,10 @@ def get_params(gk, pt_dd):
     return params
 
 def decorate_ax(ax, pt_dd):
-    if 'grid' in pt_dd:   ax.grid(**pt_dd['grid'])
+    if 'grid' in pt_dd:
+        ax.grid(**pt_dd['grid'])
+    else:
+        ax.grid(which='both')
     if 'xlim' in pt_dd:   ax.set_xlim(**pt_dd['xlim'])
     if 'ylim' in pt_dd:   ax.set_ylim(**pt_dd['ylim'])
     if 'xlabel' in pt_dd: ax.set_xlabel(**pt_dd['xlabel'])

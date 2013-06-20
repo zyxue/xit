@@ -96,7 +96,6 @@ def calc_means(h5, gk, grp, prop_obj, prop_dd, A, C):
         _l.append(_)
 
     if 'denorminators' in prop_dd:
-        print utils.get_param(prop_dd['denorminators'], gk)
         denorm = float(utils.get_param(prop_dd['denorminators'], gk))
         logger.info('denormator: {0}'.format(denorm))
         return np.array([np.mean(_l) / denorm, utils.sem(_l) / denorm])
@@ -175,9 +174,9 @@ def calc_alx(h5, gk, grp, prop_obj, prop_dd, A, C):
 
     if 'xdenorm' in prop_dd:
         ref_col = ref_col / float(prop_dd['xdenorm'])
-    if 'ydenorm' in prop_dd:
-        ydnm = float(prop_dd['ydenorm'])
-        y, ye = y / ydnm, ye / ydnm
+    if 'denorminators' in prop_dd:
+        denorm = float(utils.get_param(prop_dd['denorminators'], gk))
+        y, ye = y / denorm, ye / denorm
 
     _aa = np.array([ref_col, y, ye])
     prop_dd = utils.get_prop_dd(C, prop_obj.name)
