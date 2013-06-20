@@ -53,7 +53,11 @@ def imap(data, A, C, **kw):
         # printer friendly color maps: Orange
         im = ax.imshow(rda, origin="lower", cmap="gist_heat",
                   vmin=0, vmax=1, interpolation="nearest")
-        im.set_clim(0, max_)
+
+        if 'clim' in pt_dd:
+            im.set_clim(**pt_dd['clim'])
+        else:
+            im.set_clim(0, max_)
 
         ax.minorticks_on()
         decorate_ax(ax, pt_dd, gk)
