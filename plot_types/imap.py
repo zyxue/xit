@@ -27,13 +27,21 @@ def imap(data, A, C, **kw):
 
     pt_dd = U.get_pt_dd(C, A.property, A.plot_type)
 
-    normalize(data)
+    if 'denorminators' in pt_dd:
+        for gk in data:
+            dn = U.get_param(pt_dd['denorminators'], gk)
+            logger.info('denorminator: {0}'.format(dn))
+            data[gk] = data[gk] / dn
+
+    # used to set up the reference point and the range of color bar
     max_ = get_max(data)
     for k, gk in enumerate(data.keys()):
         ax = grid[k]
 
         da = data[gk]
         rda = da
+
+        # just for reference of seeing where the end points are
         rda[-1][-1] = max_
         rda[0][-1] = max_
         # sophisticated reversal to make x axis donor, y axis acceptor
@@ -58,10 +66,6 @@ def get_max(data):
     for i in data:
         max_.append(data[i].max(axis=0).max())
     return max(max_)
-                    
-def normalize(data):
-    for i in data:
-        data[i] = data[i] / np.sum(data[i])
 
 def decorate_ax(ax, pt_dd, gk):
     if 'xlabel' in pt_dd: ax.set_xlabel(pt_dd['xlabel'])
