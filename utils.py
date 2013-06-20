@@ -456,4 +456,4 @@ def template_file(infile, opfile, **kwargs):
     s = ''.join(inf.readlines())
     s2 = template(s, **kwargs)
     opf.write(s2)
-    logger.info('templated {0} {1}'.format(infile, opfile))
+    logger.info('templated "{0}" to "{1}"'.format(infile, opfile))

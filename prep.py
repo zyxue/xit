@@ -19,10 +19,14 @@ def prepare(A, C, core_vars):
         sed_top(core_vars, A, C)
     elif A.prepare == 'sed_0_jobsub_sh':
         sed_0_jobsub_sh(core_vars, A, C)
+    elif A.prepare == 'qsub_0_jobsub_sh':
+        qsub_0_jobsub_sh(core_vars, A, C)
     elif A.prepare == 'sed_0_mdrun_sh':
         sed_0_mdrun_sh(core_vars, A, C)
     elif A.prepare == 'qsub_0_mdrun_sh':
         qsub_0_mdrun_sh(core_vars, A, C)
+    elif A.prepare == 'targzip':
+        targzip(core_vars, A, C)
     else:
         raise ValueError("Unknown prep option: {0}".format(A.prepare))
 
@@ -72,7 +76,12 @@ def link_gro(core_vars, A, C):
             src_gro = C['prep']['link_gro']['src_gro'].format(**cv)
             if not os.path.exists(src_gro):
                 raise IOError("fatal: {0} doesn't exist!".format(src_gro))
-            target_gro = os.path.join(eq_p, os.path.basename(src_gro))
+            if 'target_gro' in C['prep']['link_gro']:
+                target_gro = os.path.join(
+                    eq_p, os.path.basename(C['prep']['link_gro']['target_gro'].format(**cv)))
+            else:
+                target_gro = os.path.join(eq_p, os.path.basename(src_gro))
+
             if tar_ex_ow(target_gro, A.overwrite):
                 rel_src_gro = os.path.relpath(src_gro, os.path.dirname(target_gro))
                 os.symlink(rel_src_gro, target_gro)
@@ -98,6 +107,14 @@ def sed_0_jobsub_sh(core_vars, A, C):
             if tar_ex_ow(output_jobsub, A.overwrite):
                 U.template_file(jobsub_tmpl, output_jobsub, **cv)
 
+
+def qsub_0_jobsub_sh(core_vars, A, C):
+    for cv in core_vars:
+        dpp = U.get_dpp(cv)
+        p = os.path.join(dpp, EQ_DIR_NAME)
+        if path_exists(dpp):
+            subprocess.call('cd {0}; qsub 0_jobsub.sh; cd -'.format(p), shell=True)
+
 def sed_0_mdrun_sh(core_vars, A, C):
     for cv in core_vars:
         dpp = U.get_dpp(cv)
@@ -112,3 +129,6 @@ def qsub_0_mdrun_sh(core_vars, A, C):
         dpp = U.get_dpp(cv)
         if path_exists(dpp):
             subprocess.call('cd {0}; qsub 0_mdrun.sh; cd -'.format(dpp), shell=True)
+
+def targzip(core_vars, A, C):
+    subprocess.call('tar cfv - {0} | gzip -cv > tprs.tar.gz', shell=True)
