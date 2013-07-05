@@ -68,12 +68,12 @@ def grped_distr(data, A, C, **kw):
         # plot a vertical line if needed, e.g. showing the time of convergence
         if 'vline' in pt_dd:
             vl = pt_dd['vline']
-            x = float(vl['x'])
+            x = vl['x']
             if 'y' in vl:
-                yb, ye = [float(i) for i in vl['y']]
+                yb, ye = vl['y']
             else:
                 yb, ye = ax.get_ylim()
-            ax.plot([x, x], [yb, ye], **vl.get('params', {}))
+            ax.plot([x, x], [yb, ye], **vl.get('vline_params', {}))
 
         decorate_ax(ax, pt_dd, ncol, nrow, c)
 

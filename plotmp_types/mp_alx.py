@@ -5,20 +5,19 @@ from collections import OrderedDict
 
 import matplotlib.pyplot as plt
 
-import utils
+import utils as U
 
-@utils.is_plotmp_type
+@U.is_plotmp_type
 def mp_alx(data, A, C, **kw):
     """alx for multiple properties (mp)"""
-    pt_dd = utils.get_pt_dd(C, '_'.join(A.properties), A.plotmp_type)
+    pt_dd = U.get_pt_dd(C, '_'.join(A.properties), A.plotmp_type)
     dsets = grp_datasets(data, pt_dd)
 
     fig = plt.figure(figsize=(12,9))
     if 'subplots_adjust' in pt_dd:
-        fig.subplots_adjust(**utils.float_params(
-                pt_dd['subplots_adjust'], 'hspace', 'wspace'))
+        fig.subplots_adjust(**pt_dd['subplots_adjust'])
 
-    ncol, nrow = utils.gen_rc(len(dsets.keys()))
+    ncol, nrow = U.gen_rc(len(dsets.keys()))
     logger.info('Chosen # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
     for c, sys_key in enumerate(dsets.keys()):
         ax = fig.add_subplot(nrow, ncol, c+1)
@@ -31,15 +30,17 @@ def mp_alx(data, A, C, **kw):
                             where=None, facecolor=params.get('color'), alpha=.3)
 
         if 'texts' in pt_dd:
-                ax.text(**utils.float_params(pt_dd['texts'][sys_key], 'x', 'y'))
+            ax.text(**U.get_param(pt_dd['texts'], sys_key))
 
         decorate_ax(ax, pt_dd, ncol, nrow, c)
-    plt.savefig(utils.gen_output_filename(A, C))
+    plt.savefig(U.gen_output_filename(A, C))
 
 def get_params(dsetk, prop_key, pt_dd):
     params = {}
     if 'colors' in pt_dd:
-        params['color'] = pt_dd['colors'][prop_key]
+        params['color'] = U.get_param(pt_dd['colors'], prop_key)
+    if 'labels' in pt_dd:
+        params['label'] = U.get_param(pt_dd['labels'], prop_key)
     return params
 
 def grp_datasets(data, pt_dd):
@@ -69,12 +70,9 @@ def grp_datasets(data, pt_dd):
 def decorate_ax(ax, pt_dd, ncol, nrow, c):
     """c: counter"""
     ax.grid(which="major")
-    if 'legends' in pt_dd:
-        leg = ax.legend(loc='best')
-    if 'xlim' in pt_dd: 
-        ax.set_xlim(**utils.float_params(pt_dd['xlim'], 'left', 'right'))
-    if 'ylim' in pt_dd:
-        ax.set_ylim(**utils.float_params(pt_dd['ylim'], 'bottom', 'top'))
+    if 'legend' in pt_dd: leg = ax.legend(**pt_dd['legend'])
+    if 'xlim' in pt_dd: ax.set_xlim(**pt_dd['xlim'])
+    if 'ylim' in pt_dd: ax.set_ylim(**pt_dd['ylim'])
 
     if c < (ncol * nrow - ncol):
         ax.set_xticklabels([])
