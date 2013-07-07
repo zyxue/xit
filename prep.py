@@ -15,6 +15,8 @@ def prepare(A, C, core_vars):
         mkdir(core_vars)
     elif A.prepare == 'link_gro':
         link_gro(core_vars, A, C)
+    elif A.prepare == 'link_tpr':
+        link_tpr(core_vars, A, C)
     elif A.prepare == 'sed_top':
         sed_top(core_vars, A, C)
     elif A.prepare == 'sed_0_jobsub_sh':
@@ -87,6 +89,24 @@ def link_gro(core_vars, A, C):
                 os.symlink(rel_src_gro, target_gro)
                 logger.info('symlink: {0} -> {1}'.format(rel_src_gro, target_gro))
 
+def link_tpr(core_vars, A, C):
+    for cv in core_vars:
+        dpp = U.get_dpp(cv)
+        src_tpr = C['prep']['link_tpr']['src_tpr'].format(**cv)
+        if not os.path.exists(src_tpr):
+            raise IOError("fatal: {0} doesn't exist!".format(src_tpr))
+        if 'target_tpr' in C['prep']['link_tpr']:
+            target_tpr = os.path.join(
+                dpp, os.path.basename(C['prep']['link_tpr']['target_tpr'].format(**cv)))
+        else:
+            target_tpr = os.path.join(dpp, os.path.basename(src_tpr))
+
+        if tar_ex_ow(target_tpr, A.overwrite):
+            rel_src_tpr = os.path.relpath(src_tpr, os.path.dirname(target_tpr))
+            os.symlink(rel_src_tpr, target_tpr)
+            logger.info('symlink: {0} -> {1}'.format(rel_src_tpr, target_tpr))
+
+
 def sed_top(core_vars, A, C):
     for cv in core_vars:
         dpp = U.get_dpp(cv)     # dpp: deepest path
@@ -111,9 +131,9 @@ def sed_0_jobsub_sh(core_vars, A, C):
 def qsub_0_jobsub_sh(core_vars, A, C):
     for cv in core_vars:
         dpp = U.get_dpp(cv)
-        p = os.path.join(dpp, EQ_DIR_NAME)
+        eq_p = os.path.join(dpp, EQ_DIR_NAME)
         if path_exists(dpp):
-            subprocess.call('cd {0}; qsub 0_jobsub.sh; cd -'.format(p), shell=True)
+            subprocess.call('cd {0}; qsub 0_jobsub.sh; cd -'.format(eq_p), shell=True)
 
 def sed_0_mdrun_sh(core_vars, A, C):
     for cv in core_vars:
