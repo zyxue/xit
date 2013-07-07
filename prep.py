@@ -66,6 +66,7 @@ def link_gro(core_vars, A, C):
             target_gro = os.path.join(eq_p, os.path.basename(src_gro))
 
         if tar_ex_ow(target_gro, A.overwrite):
+            print target_gro
             rel_src_gro = os.path.relpath(src_gro, os.path.dirname(target_gro))
             os.symlink(rel_src_gro, target_gro)
             logger.info('symlink: {0} -> {1}'.format(rel_src_gro, target_gro))
@@ -97,15 +98,19 @@ def gen_template_output(key, cv, path, C):
     return template, output
 
 def exec_cmd(key, core_vars, A, C):
+    x = gen_cmd(key, core_vars, A, C)
+    U.runit(x, 4, False)       # numthreads = 4 temporarily, False mean not testing
+
+def gen_cmd(key, core_vars, A, C):
     for cv in core_vars:
         eq_p = dpp = U.get_dpp(cv)
         if (key == 'qsub_0_mdrun_sh') or (not A.nobeforenpt):
             eq_p = os.path.join(dpp, EQ_DIR_NAME)
         must_exist(eq_p)
-        cmd = gen_cmd(key, eq_p)
-        subprocess.call(cmd, shell=True)
+        cmd = construct_cmd(key, eq_p)
+        yield (cmd, None)       # none means nolog
 
-def gen_cmd(key, p):
+def construct_cmd(key, p):
     if key == 'qsub_0_jobsub_sh':
         return 'cd {0}; qsub 0_jobsub.sh; cd -'.format(p)
     elif key == 'exec_0_jobsub_sh':
@@ -127,7 +132,8 @@ def targzip(core_vars, A, C):
 
 def tar_ex_ow(target_file, f_overwrite):
     """tar_ex_ow: target_exists_or_overwrite"""
-    if not os.path.exists(target_file):
+    if (not os.path.exists(target_file)) and not os.path.islink(target_file):
+        # os.path.exists return False for symbolic link
         return True
     elif f_overwrite:
         if os.path.islink(target_file): # since it cannot be overwritten, has to delete it first
