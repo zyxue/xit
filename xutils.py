@@ -57,10 +57,12 @@ def get_args(args_to_parse=None):
     prep_parser = subparsers.add_parser('prep', help='used during simulation preparation')
     mgrp = prep_parser.add_mutually_exclusive_group()
     mgrp.add_argument('-p', '--prepare', choices=[
-            'mkdir', 'link_gro', 'link_tpr',
-            'sed_top', 'sed_0_jobsub_sh', 'sed_0_mdrun_sh',
-            'qsub_0_jobsub_sh', 'qsub_0_mdrun_sh'])
+            'mkdir', 'link_gro', 'sed_top', 'sed_itp', 'sed_0_jobsub_sh', 'sed_0_mdrun_sh',
+            'qsub_0_jobsub_sh', 'exec_0_jobsub_sh', 'qsub_0_mdrun_sh'])
+    # exec_0_jobsub_sh is usually used when the equilibration doesn't take a long time
+
     prep_parser.add_argument('--overwrite', action='store_true', help='overwrite previous file when do sed')
+    prep_parser.add_argument('--nobeforenpt', action='store_true', help="don't mkdir beforenpt when doing -p mkdir")
 
     anal_parser = subparsers.add_parser(
         'anal', help='do different sorts of analysis')
