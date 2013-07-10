@@ -36,7 +36,7 @@ def grped_omega_distr(data, A, C, **kw):
             ax.hist(da, bins=bins, normed=False, alpha=0.3, **params)
 
         decorate_ax(ax, pt_dd, ncol, nrow, c)
-    plt.savefig(U.gen_output_filename(A, C))
+    plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
 def get_params(key, pt_dd):
     params = {}
