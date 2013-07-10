@@ -12,7 +12,7 @@ def pmf(data, A, C, **kw):
 
     pt_dd = U.get_pt_dd(C, A.property, A.plot_type)
 
-    fs = (float(i) for i in pt_dd['figsize']) if 'figsize' in pt_dd else (12,9)
+    fs = pt_dd.get('figsize', (12,9))
     fig = plt.figure(figsize=fs)
 
     if A.merge:
@@ -111,9 +111,9 @@ def pmf(data, A, C, **kw):
 
             text_params = {}
             text_params.update(**pt_dd['text'])
-            ax.text(s = '\n'.join(['k   = {0:.1f} +/- {1:.1f} pN/nm'.format(_k, _ke),
-                                   'd_0  = {0:.1f} +/- {1:.1f} nm'.format(_l0, _l0e),
-                                   'r^2 = {0:.2f}'.format(_r2)]),
+            ax.text(s = '\n'.join(['k   = {0:.1f} $\pm$ {1:.1f} pN/nm'.format(_k, _ke),
+                                   'd$_0$  = {0:.1f} $\pm$ {1:.1f} nm'.format(_l0, _l0e),
+                                   'r$^2$ = {0:.2f}'.format(_r2)]),
                                    # 'ky  = {0:.1f} +/- {1:.1f} MPa'.format(_ky, _kye)]),
                     **text_params)
 
@@ -122,7 +122,7 @@ def pmf(data, A, C, **kw):
             ax.fill_between(bn, pmfm-pmfe, pmfm+pmfe, 
                             where=None, facecolor=params.get('color'), alpha=.3)
 
-            ax.plot(bn, _pfit, '--')
+            ax.plot(bn, _pfit, '--', color=params.get('color'))
             decorate_ax(ax, pt_dd)
 
     plt.savefig(U.gen_output_filename(A, C))
