@@ -1,5 +1,3 @@
-import utils
-
 def rg_c_alpha(**kw):
     """
     Radius of Gyration: backbone heavy atoms only. e.g. for (GVPGV)7, there would be 107 atoms,

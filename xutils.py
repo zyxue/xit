@@ -62,7 +62,6 @@ def get_args(args_to_parse=None):
     # exec_0_jobsub_sh is usually used when the equilibration doesn't take a long time
 
     prep_parser.add_argument('--overwrite', action='store_true', help='overwrite previous file when do sed')
-    prep_parser.add_argument('--nobeforenpt', action='store_true', help="don't mkdir beforenpt when doing -p mkdir")
 
     anal_parser = subparsers.add_parser(
         'anal', help='do different sorts of analysis')

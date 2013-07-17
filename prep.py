@@ -1,12 +1,9 @@
 import os
-import re
 import subprocess
 import logging
 logger = logging.getLogger(__name__)
 
-from pprint import pprint as pp
-
-EQ_DIR_NAME = 'beforenpt'
+import setting as S
 
 import utils as U
 
@@ -36,10 +33,9 @@ def mkdir(core_vars, A, C):
         ps = paths[dp]
         for p in ps:
             mk_new_dir(p)
-            if not A.nobeforenpt:
-                if dp == max_depth:
-                    eq_p = os.path.join(p, EQ_DIR_NAME) # eq_p: equilibration path
-                    mk_new_dir(eq_p)
+            if dp == max_depth:
+                eq_p = os.path.join(p, S. EQ_DIR_NAME) # eq_p: equilibration path
+                mk_new_dir(eq_p)
 
 def mk_new_dir(p):
     if not os.path.exists(p):
@@ -53,9 +49,8 @@ def link_gro(core_vars, A, C):
         src_gro = C['prep']['link_gro']['src_gro'].format(**cv)
         must_exist(src_gro)
 
-        eq_p = dpp = U.get_dpp(cv)
-        if not A.nobeforenpt:
-            eq_p = os.path.join(dpp, EQ_DIR_NAME)        
+        dpp = U.get_dpp(cv)
+        eq_p = os.path.join(dpp, S. EQ_DIR_NAME)        
 
         must_exist(eq_p)
 
@@ -73,9 +68,8 @@ def link_gro(core_vars, A, C):
 
 def sed_file(key, core_vars, A, C):
     for cv in core_vars:
-        eq_p = dpp = U.get_dpp(cv)     # dpp: deepest path
-        if not A.nobeforenpt:
-            eq_p = os.path.join(dpp, EQ_DIR_NAME)
+        dpp = U.get_dpp(cv)     # dpp: deepest path
+        eq_p = os.path.join(dpp, S. EQ_DIR_NAME)
         must_exist(eq_p)
 
         template, output = gen_template_output(key, cv, eq_p, C)
@@ -104,8 +98,8 @@ def exec_cmd(key, core_vars, A, C):
 def gen_cmd(key, core_vars, A, C):
     for cv in core_vars:
         eq_p = dpp = U.get_dpp(cv)
-        if (key == 'qsub_0_mdrun_sh') or (not A.nobeforenpt):
-            eq_p = os.path.join(dpp, EQ_DIR_NAME)
+        if (key == 'qsub_0_mdrun_sh'):
+            eq_p = os.path.join(dpp, S. EQ_DIR_NAME)
         must_exist(eq_p)
         cmd = construct_cmd(key, eq_p)
         yield (cmd, None)       # none means nolog

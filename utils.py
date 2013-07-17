@@ -11,6 +11,8 @@ from collections import OrderedDict
 from functools import update_wrapper
 from jinja2 import Template
 
+import settings as S
+
 import tables
 import numpy as np
 
@@ -208,6 +210,15 @@ def gen_io_files(target_dir, pf):
     """
 
     io_files = dict(
+        em_edrf = os.path.join(
+            target_dir, S.EQ_DIR_NAME, '{0}_em.edr'.format(pf)),
+        em_xtcf = os.path.join(
+            target_dir, S.EQ_DIR_NAME, '{0}_em.xtc'.format(pf)),
+        em_tprf = os.path.join(
+            target_dir, S.EQ_DIR_NAME, '{0}_em.tpr'.format(pf)),
+
+        # above are for filenames during equilibration process
+
         xtcf = os.path.join(
             target_dir, '{pf}_md.xtc'.format(pf=pf)),
         centerxtcf = os.path.join(
@@ -457,3 +468,7 @@ def template_file(infile, opfile, **kwargs):
     s2 = template(s, **kwargs)
     opf.write(s2)
     logger.info('templated "{0}" to "{1}"'.format(infile, opfile))
+
+def signed_int(i):
+    """convert int_id in p100 or n100 to signed int as 100 or -100"""
+    return int(i[1:]) if i.startswith('p') else -int(i[1:])
