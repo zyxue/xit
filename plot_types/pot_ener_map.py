@@ -15,10 +15,13 @@ def pot_ener_map(data, A, C, **kw):
     pt_dd = U.get_pt_dd(C, A.property, A.plot_type)
     
     fig = plt.figure(figsize=pt_dd.get('figsize', (12,9)))
-    col, row = U.gen_rc(len(data.keys()), pt_dd)
+    if 'subplots_adjust' in pt_dd:
+        fig.subplots_adjust(**pt_dd['subplots_adjust'])
+
+    ncol, nrow = U.gen_rc(len(data.keys()), pt_dd)
 
     for c, gk in enumerate(data.keys()):
-        ax = fig.add_subplot(row, col, c+1)
+        ax = fig.add_subplot(nrow, ncol, c+1)
         [phis, psis], da = data[gk]
 
         # this is just for determining the proper levels
@@ -37,34 +40,48 @@ def pot_ener_map(data, A, C, **kw):
 
         contour = ax.contourf(phis, psis, da, **params)
         plt.colorbar(contour, shrink=0.6, extend='both')
-        decorate_ax(ax, gk, pt_dd)
+        decorate_ax(ax, gk, pt_dd, ncol, nrow, c)
 
-    plt.savefig(U.gen_output_filename(A, C))
+    plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
 def get_params(gk, pt_dd):
     params = {}
     if 'cmaps' in pt_dd:
         params['cmap'] = getattr(cm, U.get_param(pt_dd['cmaps'], gk))
     if 'levels' in pt_dd:
-        min_, max_, step = pt_dd['levels']
-        # +1 so that max_ will be included in the final levels
-        params['levels'] = range(min_, max_+1, step)
+        _ = U.get_param(pt_dd['levels'], gk)
+        if _: 
+            min_, max_, step = _
+            # +1 so that max_ will be included in the final levels
+            params['levels'] = range(min_, max_+1, step)
 
     # the potential energy map usually does not need color and label decoration
     return params
 
-def decorate_ax(ax, gk, pt_dd):
+def decorate_ax(ax, gk, pt_dd, ncol, nrow, c):
+    if c < (ncol * nrow - ncol):
+        ax.set_xticklabels([])
+        # ax.get_xaxis().set_visible(False)                   # this hide the whole axis
+    else:
+        if 'xlabel' in pt_dd: 
+            ax.set_xlabel(**pt_dd['xlabel'])
+
+    if c % ncol == 0:
+        if 'ylabel' in pt_dd:
+            ax.set_ylabel(**pt_dd['ylabel'])
+    else:
+        ax.set_yticklabels([])
+
     if 'grid' in pt_dd:
         ax.grid(**pt_dd['grid'])
     else:
         ax.grid(which='both')
     if 'xlim' in pt_dd:   ax.set_xlim(**pt_dd['xlim'])
     if 'ylim' in pt_dd:   ax.set_ylim(**pt_dd['ylim'])
-    if 'xlabel' in pt_dd: ax.set_xlabel(**pt_dd['xlabel'])
-    if 'ylabel' in pt_dd: ax.set_ylabel(**pt_dd['ylabel'])
     if 'xscale' in pt_dd: ax.set_xscale(**pt_dd['xscale'])
     if 'titles' in pt_dd:
         ax.set_title(U.get_param(pt_dd['titles'], gk))
+
 
 def adjust_minima(data):
     """adjust the minmum values of data and make them have the same minimum"""
