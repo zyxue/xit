@@ -19,15 +19,14 @@ matplotlib.rcParams['ytick.direction'] = 'out'
 def imap(data, A, C, **kw):
     """imap: interaction map"""
     logger.info('start plotting interaction map...')
+    pt_dd = U.get_pt_dd(C, A.property, A.plot_type)
+    print pt_dd
 
     fig = plt.figure(figsize=(12,9))
-    col, row = U.gen_rc(len(data.keys()))
-    col, row = row, col
+    col, row = U.gen_rc(len(data.keys()), pt_dd)
     grid = ImageGrid(fig, 111, nrows_ncols = (row, col), 
                      axes_pad = 0.3, 
                      add_all=True, label_mode = "L")
-
-    pt_dd = U.get_pt_dd(C, A.property, A.plot_type)
 
     if 'denorminators' in pt_dd:
         for gk in data:
@@ -66,7 +65,7 @@ def imap(data, A, C, **kw):
         decorate_ax(ax, pt_dd, gk)
 
     plt.colorbar(im, shrink=.5, orientation='vertical', anchor=(1.3, 0))
-    plt.savefig(U.gen_output_filename(A, C))
+    plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
 def get_max(data):
     max_ = []
