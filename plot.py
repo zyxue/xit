@@ -115,7 +115,7 @@ def calc_pot_ener_map(h5, gk, grp, prop_obj, prop_dd, A, C):
 
     opf = open('lele', 'w')
     res = np.zeros((len(phis), len(psis)))
-    print res.shape
+    logger.info('map shape: {0}'.format(res.shape))
     for i, phi in enumerate(phis):
         for j, psi in enumerate(psis):
             res[j][i] = dd[phi][psi]
