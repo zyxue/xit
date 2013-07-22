@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 import os
 import logging
 logger = logging.getLogger(__name__)
 
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib import cm
 import numpy as np
 
 from mpl_toolkits.axes_grid1 import ImageGrid
@@ -50,9 +52,10 @@ def imap(data, A, C, **kw):
         # sophisticated reversal to make x axis acceptor, y axis donor
         # rda = np.array([i[::-1] for i in da[::-1]])
 
-        # printer friendly color maps: Orange
-        im = ax.imshow(rda, origin="lower", cmap="gist_heat",
-                  vmin=0, vmax=1, interpolation="nearest")
+        params = get_params(gk, pt_dd)
+        logger.info(params)
+        # cmap_options: hot, gist_heat, Orange (printer friendly)
+        im = ax.imshow(rda, origin="lower", vmin=0, vmax=1, **params)
 
         if 'clim' in pt_dd:
             im.set_clim(**pt_dd['clim'])
@@ -70,6 +73,19 @@ def get_max(data):
     for i in data:
         max_.append(data[i].max(axis=0).max())
     return max(max_)
+
+def get_params(gk, pt_dd):
+    params = {}
+    if 'cmap' in pt_dd:
+        params['cmap'] = getattr(cm, pt_dd['cmap'])
+    if 'interpolation' in pt_dd:
+        params['interpolation'] = pt_dd['interpolation']
+        # Acceptable values are None, ‘none’, ‘nearest’, ‘bilinear’, ‘bicubic’,
+        # ‘spline16’, ‘spline36’, ‘hanning’, ‘hamming’, ‘hermite’, ‘kaiser’,
+        # ‘quadric’, ‘catrom’, ‘gaussian’, ‘bessel’, ‘mitchell’, ‘sinc’,
+        # ‘lanczos’
+
+    return params
 
 def decorate_ax(ax, pt_dd, gk):
     if 'xlabel' in pt_dd: ax.set_xlabel(pt_dd['xlabel'])
