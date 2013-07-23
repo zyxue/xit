@@ -3,15 +3,15 @@ import subprocess
 import logging
 logger = logging.getLogger(__name__)
 
-import setting as S
+import settings as S
 
 import utils as U
 
 def prepare(A, C, core_vars):
     if A.prepare == 'mkdir':
         mkdir(core_vars, A, C)
-    elif A.prepare == 'link_gro':
-        link_gro(core_vars, A, C)
+    # elif A.prepare == 'link_gro':
+    #     link_gro(core_vars, A, C)
     elif A.prepare in ['sed_top', 'sed_itp', 'sed_0_jobsub_sh']:
         sed_file(A.prepare, core_vars, A, C)
     elif A.prepare in ['qsub_0_jobsub_sh', 'exec_0_jobsub_sh', 'qsub_0_mdrun_sh']:
@@ -34,7 +34,7 @@ def mkdir(core_vars, A, C):
         for p in ps:
             mk_new_dir(p)
             if dp == max_depth:
-                eq_p = os.path.join(p, S. EQ_DIR_NAME) # eq_p: equilibration path
+                eq_p = os.path.join(p, S.EQ_DIR_NAME) # eq_p: equilibration path
                 mk_new_dir(eq_p)
 
 def mk_new_dir(p):
@@ -44,32 +44,35 @@ def mk_new_dir(p):
     else:
         logger.info('{0} ALREADY EXISTED'.format(p))
 
-def link_gro(core_vars, A, C):
-    for cv in core_vars:
-        src_gro = C['prep']['link_gro']['src_gro'].format(**cv)
-        must_exist(src_gro)
+# LINK_GRO SEEMS REDUNDANT SINCE src_gro CAN BE SPECIFIED IN
+# 0_jobsub.sh.template DIRECTLY --2013-07-23
 
-        dpp = U.get_dpp(cv)
-        eq_p = os.path.join(dpp, S. EQ_DIR_NAME)        
+# def link_gro(core_vars, A, C):
+#     for cv in core_vars:
+#         src_gro = C['prep']['link_gro']['src_gro'].format(**cv)
+#         must_exist(src_gro)
 
-        must_exist(eq_p)
+#         dpp = U.get_dpp(cv)
+#         eq_p = os.path.join(dpp, S.EQ_DIR_NAME)        
 
-        if 'target_gro' in C['prep']['link_gro']:
-            target_gro = os.path.join(
-                eq_p, os.path.basename(C['prep']['link_gro']['target_gro'].format(**cv)))
-        else:
-            target_gro = os.path.join(eq_p, os.path.basename(src_gro))
+#         must_exist(eq_p)
 
-        if tar_ex_ow(target_gro, A.overwrite):
-            print target_gro
-            rel_src_gro = os.path.relpath(src_gro, os.path.dirname(target_gro))
-            os.symlink(rel_src_gro, target_gro)
-            logger.info('symlink: {0} -> {1}'.format(rel_src_gro, target_gro))
+#         if 'target_gro' in C['prep']['link_gro']:
+#             target_gro = os.path.join(
+#                 eq_p, os.path.basename(C['prep']['link_gro']['target_gro'].format(**cv)))
+#         else:
+#             target_gro = os.path.join(eq_p, os.path.basename(src_gro))
+
+#         if tar_ex_ow(target_gro, A.overwrite):
+#             print target_gro
+#             rel_src_gro = os.path.relpath(src_gro, os.path.dirname(target_gro))
+#             os.symlink(rel_src_gro, target_gro)
+#             logger.info('symlink: {0} -> {1}'.format(rel_src_gro, target_gro))
 
 def sed_file(key, core_vars, A, C):
     for cv in core_vars:
         dpp = U.get_dpp(cv)     # dpp: deepest path
-        eq_p = os.path.join(dpp, S. EQ_DIR_NAME)
+        eq_p = os.path.join(dpp, S.EQ_DIR_NAME)
         must_exist(eq_p)
 
         template, output = gen_template_output(key, cv, eq_p, C)
@@ -98,8 +101,8 @@ def exec_cmd(key, core_vars, A, C):
 def gen_cmd(key, core_vars, A, C):
     for cv in core_vars:
         eq_p = dpp = U.get_dpp(cv)
-        if (key == 'qsub_0_mdrun_sh'):
-            eq_p = os.path.join(dpp, S. EQ_DIR_NAME)
+        if key in ['qsub_0_jobsub_sh', 'exec_0_jobsub_sh']:
+            eq_p = os.path.join(dpp, S.EQ_DIR_NAME)
         must_exist(eq_p)
         cmd = construct_cmd(key, eq_p)
         yield (cmd, None)       # none means nolog
