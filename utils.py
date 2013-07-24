@@ -97,18 +97,18 @@ def gen_rc(n, pt_dd={}):
         logger.info('found ncol_nrow in config file, # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
         return ncol, nrow
 
-    c = int(np.sqrt(n))
-    r = c
+    r = int(np.sqrt(n))
+    c = r
     if c * r == n:
         return c, r
     else:         # r * c < n                                                  
-        r = r + 1
-        if r * c < n:
-            ncol, nrow = c, r+1, 
+        c = c + 1
+        if c * r < n:
+            ncol, nrow = c + 1, r, 
         else:
             ncol, nrow = c, r
     logger.info('Chosen # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
-    return ncol, nrow
+    return ncol, nrow           # prefer longer ncol than nrow
 
 def split(l, group_size):
     """split a list into n chunks"""
