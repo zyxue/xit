@@ -337,7 +337,7 @@ def get_prop_dd(C, prop_name, fvb=False):
 def get_pt_dd(C, prop_name, pt_name, fvb=False):
     """get the configuration for plot type or plotmp type (pt) under the plots
     section of .xitconfig"""
-    r = get_prop_dd(C, prop_name)
+    r = get_prop_dd(C, prop_name, fvb)
     if r:
         rr = r.get(pt_name)
         if rr:
@@ -472,3 +472,33 @@ def template_file(infile, opfile, **kwargs):
 def signed_int(i):
     """convert int_id in p100 or n100 to signed int as 100 or -100"""
     return int(i[1:]) if i.startswith('p') else -int(i[1:])
+
+
+def prob2pmf(p, max_p, e=None):
+    """
+    p: p_x
+    max_p: p_x0
+    e: variance of p_x, used to calc error propagation
+
+    convert the probability of e2ed to potential of mean force
+    """
+
+    T = 300                                                 # Kelvin
+    # R = 8.3144621                                           # J/(K*mol)
+    R = 8.3144621e-3                                        # KJ/(K*mol)
+    # R = 1.9858775                                           # cal/(K*mol)
+    # pmf = - R * T * np.log(p / float(max_p))
+
+    # k = 1.3806488e-23                         # Boltzman constant J*K-1
+    pmf = - R * T * np.log(p / float(max_p))  # prefer to use k and Joule
+                                              # instead so I could estimate the
+    if e is not None:
+        e = e
+        # Now, calc error propagation
+        # since = pmf = -R * T * ln(p_x / p_x0)
+        # First, we calc the error of (p_x / p_x0)
+        # error_of_p_x_divided_by_p_x0 = e**2 / p_x0**2
+        pmf_e = -R * T * e / p
+        return pmf, pmf_e
+    else:
+        return pmf

@@ -20,7 +20,6 @@ def imap(data, A, C, **kw):
     """imap: interaction map"""
     logger.info('start plotting interaction map...')
     pt_dd = U.get_pt_dd(C, A.property, A.plot_type)
-    print pt_dd
 
     fig = plt.figure(figsize=(12,9))
     col, row = U.gen_rc(len(data.keys()), pt_dd)
@@ -87,8 +86,8 @@ def get_params(gk, pt_dd):
     return params
 
 def decorate_ax(ax, pt_dd, gk):
-    if 'xlabel' in pt_dd: ax.set_xlabel(pt_dd['xlabel'])
-    if 'ylabel' in pt_dd: ax.set_ylabel(pt_dd['ylabel'])
+    if 'xlabel' in pt_dd: ax.set_xlabel(**pt_dd['xlabel'])
+    if 'ylabel' in pt_dd: ax.set_ylabel(**pt_dd['ylabel'])
     
     if 'titles' in pt_dd:
         ax.set_title(U.get_param(pt_dd['titles'], gk))

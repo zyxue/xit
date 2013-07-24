@@ -48,7 +48,7 @@ def calc_fetch_or_overwrite(grps, prop_obj, data, A, C, h5):
          # rama cannot be calculated and stored because the result dtype would
          # be object, and their shape would be of different dimensions,
          # .e.g. np.array([h, phip, psip]).shape: (10, 10) (10,) (10,)
-         (get_rama, 'rama'): ['rama'],
+         (get_rama, 'rama'): ['rama', 'rama_pmf'],
          })
 
     for c, gk in enumerate(grps):
@@ -88,7 +88,7 @@ def calc_fetch_or_overwrite(grps, prop_obj, data, A, C, h5):
                 # it because usually object is a combination of other
                 # calculated properties, which are store, so fetching them is
                 # still fast
-                print ar_where
+                logger.info(ar_where)
                 h5.createArray(where=ar_where, name=ar_name, object=ar)
             else:
                 logger.info('"{0}" dtype number array CANNNOT be stored in h5'.format(ar.dtype.name))
@@ -258,41 +258,12 @@ def calc_pmf(h5, gk, grp, prop_obj, prop_dd, A, C):
     da = []
     for sp in subgrps:
         bn, psm, pse = calc_distr(h5, '', sp, prop_obj, prop_dd, A, C)
-        pmf, pmf_e = prob2pmf(psm, max(psm), pse)
+        pmf, pmf_e = U.prob2pmf(psm, max(psm), pse)
         for b, i in zip(bn, pmf):
             print b, i
         sub_da = np.array([bn, pmf, pmf_e])
         da.append(sub_da)
     return np.array(da)
-
-def prob2pmf(p, max_p, e=None):
-    """
-    p: p_x
-    max_p: p_x0
-    e: variance of p_x, used to calc error propagation
-
-    convert the probability of e2ed to potential of mean force
-    """
-
-    T = 300                                                 # Kelvin
-    # R = 8.3144621                                           # J/(K*mol)
-    R = 8.3144621e-3                                        # KJ/(K*mol)
-    # R = 1.9858775                                           # cal/(K*mol)
-    # pmf = - R * T * np.log(p / float(max_p))
-
-    # k = 1.3806488e-23                         # Boltzman constant J*K-1
-    pmf = - R * T * np.log(p / float(max_p))  # prefer to use k and Joule
-                                              # instead so I could estimate the
-    if e is not None:
-        e = e
-        # Now, calc error propagation
-        # since = pmf = -R * T * ln(p_x / p_x0)
-        # First, we calc the error of (p_x / p_x0)
-        # error_of_p_x_divided_by_p_x0 = e**2 / p_x0**2
-        pmf_e = -R * T * e / p
-        return pmf, pmf_e
-    else:
-        return pmf
 
 def fetch_grp_tb(h5, grp, prop_name):
     """fetch tbs bashed on where values in grp"""
