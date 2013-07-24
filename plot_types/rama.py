@@ -92,14 +92,19 @@ def rama_pmf(data, A, C, **kw):
 
         h_pmf = U.prob2pmf(h, h.max())
 
-        lenx, leny = h_pmf.shape # len: length
-        for _i in range(lenx):
-            for _j in range(leny):
-                if h_pmf[_i][_j] == np.inf:
-                    h_pmf[_i][_j] = -np.inf
+        # lenx, leny = h_pmf.shape # len: length
+        # for _i in range(lenx):
+        #     for _j in range(leny):
+        #         if h_pmf[_i][_j] == np.inf:
+        #             h_pmf[_i][_j] = -np.inf
+        # faster then the above looping
+        np.place(h_pmf, h_pmf==np.inf, -np.inf)
+
 
         cmap = getattr(cm, pt_dd.get('cmap', 'jet'))
-        contour = ax.contourf(phi_edges, psi_edges, h_pmf, cmap=cmap)
+        # this step can a while
+        F = U.timeit(ax.contourf)
+        contour = F(phi_edges, psi_edges, h_pmf, cmap=cmap)
         fig.colorbar(contour, shrink=0.6, extend='both')
 
         contours.append(contour)
@@ -115,6 +120,7 @@ def rama_pmf(data, A, C, **kw):
 
     plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
+@U.timeit
 def decorate_ax(ax, pt_dd, ncol, nrow, c, gk, A):
     if 'grid' in pt_dd:
         ax.grid(**pt_dd['grid'])
