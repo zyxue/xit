@@ -70,7 +70,7 @@ def rama_pmf(data, A, C, **kw):
     if 'subplots_adjust' in pt_dd:
         fig.subplots_adjust(**pt_dd['subplots_adjust'])
 
-    bins = pt_dd.get('bins', 180)
+    bins = pt_dd.get('bins', 36)
     normed = pt_dd.get('normed', False)
     contours = []
 
