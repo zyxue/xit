@@ -70,11 +70,15 @@ def rama_pmf(data, A, C, **kw):
     if 'subplots_adjust' in pt_dd:
         fig.subplots_adjust(**pt_dd['subplots_adjust'])
 
-    bins = pt_dd.get('bins', 360)
+    bins = pt_dd.get('bins', 180)
     normed = pt_dd.get('normed', False)
     contours = []
 
-    max_ = None
+    cutoff = pt_dd.get('cutoff', np.inf)
+    if cutoff == np.inf:
+        max_ = None
+    else:
+        max_ = cutoff
     for c, gk in enumerate(data.keys()):
         ax = fig.add_subplot(nrow, ncol, c+1)
         da = data[gk]
@@ -98,8 +102,7 @@ def rama_pmf(data, A, C, **kw):
         #         if h_pmf[_i][_j] == np.inf:
         #             h_pmf[_i][_j] = -np.inf
         # faster then the above looping
-        np.place(h_pmf, h_pmf==np.inf, -np.inf)
-
+        np.place(h_pmf, h_pmf>=cutoff, -np.inf)
 
         cmap = getattr(cm, pt_dd.get('cmap', 'jet'))
         # this step can a while
@@ -111,9 +114,10 @@ def rama_pmf(data, A, C, **kw):
     
         decorate_ax(ax, pt_dd, ncol, nrow, c, gk, A)
 
-        ma = h_pmf.max()
-        if max_ is None or ma > max_:
-            max_ = ma
+        if cutoff == np.inf:
+            ma = h_pmf.max()
+            if max_ is None or ma > max_:
+                max_ = ma
 
     for _ in contours:
         _.set_clim(0, max_)
