@@ -19,7 +19,8 @@ class convert_vars(argparse.Action):
             svalue = value.split()
             for val in svalue:
                 # not trivial a regex that works!
-                mat = re.search('([a-z]*)((?:[0-9]+|\[\d+-\d+\])?)', val)
+                # this does not work with names like sr1_CT3, g3ub
+                mat = re.match('([a-zA-Z_0-9]*)((?:\[\d+-\d+\])?)$', val)
                 if mat:                                     # mat: match
                     prefix, num = mat.groups()
                     if num == '':
