@@ -5,10 +5,14 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import numpy as np
 
+import pickle
 import utils as U
 
 @U.is_plot_type
 def pot_ener_map(data, A, C, **kw):
+    for k in data.keys():
+        data[k] = pickle.loads(data[k])
+
     adjust_minima(data)
 
     logger.info('start potential energy map...')
@@ -29,7 +33,7 @@ def pot_ener_map(data, A, C, **kw):
 
         # further process da, mainly about removing peaks
         if 'levels' in pt_dd:
-            min_, max_, step = pt_dd['levels']
+            min_, max_, step = U.get_param(pt_dd['levels'], gk)
             for i in range(da.shape[0]):
                 for j in range(da.shape[1]):
                     v = da[i][j]
@@ -47,7 +51,8 @@ def pot_ener_map(data, A, C, **kw):
 def get_params(gk, pt_dd):
     params = {}
     if 'cmaps' in pt_dd:
-        params['cmap'] = getattr(cm, U.get_param(pt_dd['cmaps'], gk))
+        # params['cmap'] = getattr(cm, U.get_param(pt_dd['cmaps'], gk))
+        params['cmap'] = getattr(cm, pt_dd['cmaps'])
     if 'levels' in pt_dd:
         _ = U.get_param(pt_dd['levels'], gk)
         if _: 
@@ -88,6 +93,7 @@ def adjust_minima(data):
     if len(data.keys()) <= 1:
         return
 
+    print data['sr1/ff4'][0]
     das = [data[i][1] for i in data.keys()]
 
     diff = [0]

@@ -1,11 +1,15 @@
-import sys
 import os
-import re
+import sys
+
 import logging
 logger = logging.getLogger(__name__)
+
+import re
+import pickle
 from collections import OrderedDict
 
 import numpy as np
+from tables import ObjectAtom
 from tables.exceptions import NoSuchNodeError
 
 # from scipy import stats
@@ -78,20 +82,26 @@ def calc_fetch_or_overwrite(grps, prop_obj, data, A, C, h5):
                 _ = h5.getNode(ar_whname)
                 _.remove()
                 ar = calc_type_func(h5, gk, grps[gk], prop_obj, prop_dd, A, C)
+                if ar.dtype.name == 'object':
+                    ar = pickle.dumps(ar)
                 h5.createArray(where=ar_where, name=ar_name, object=ar)
                 sda = ar
         else:
             if A.v: logger.info('Calculating subdata...')
             ar = calc_type_func(h5, gk, grps[gk], prop_obj, prop_dd, A, C)
-            if ar.dtype.name != 'object':
-                # cannot be handled by tables yet, but it's fine not to store
-                # it because usually object is a combination of other
-                # calculated properties, which are store, so fetching them is
-                # still fast
-                logger.info(ar_where)
-                h5.createArray(where=ar_where, name=ar_name, object=ar)
-            else:
-                logger.info('"{0}" dtype number array CANNNOT be stored in h5'.format(ar.dtype.name))
+            if ar.dtype.name == 'object':
+                logger.info('data is of dtype=object, pickling it'.format(ar.dtype.name))
+                # cannot be handled by tables yet, so pickle it first
+                ar = pickle.dumps(ar)
+            logger.info(ar_where)
+            h5.createArray(where=ar_where, name=ar_name, object=ar)
+
+            # an alternative way to pickling, not very useful because it's an
+            # array, which adds unnecessary slicing. Leave here fore reference
+            # --2013-07-25
+
+            # theobject = h5.createVLArray(where=ar_where, name=ar_name, atom=ObjectAtom())
+            # theobject.append(ar)
             sda = ar
         data[gk] = sda
 
