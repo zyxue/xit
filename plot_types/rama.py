@@ -13,6 +13,8 @@ always closely together. Therefore, we need a separate function rama here
 independent of histo2D
 """
 
+HIST2D_RANGES = [[-180,180], [-180,180]]
+
 @U.is_plot_type
 def rama(data, A, C, **kw):
     pt_dd = U.get_pt_dd(C, A.property, A.plot_type, A.v)
@@ -62,67 +64,78 @@ def rama_pmf(data, A, C, **kw):
         # if there is no rama_pmf, search for rama instead, this is trying to
         # reduce duplication in .xitconfig.yaml
         pt_dd = U.get_pt_dd(C, A.property, 'rama', A.v)
-    print pt_dd
+
+    logger.info(pt_dd)
 
     ncol, nrow = U.gen_rc(len(data.keys()), pt_dd)
-    fig = plt.figure(figsize=(ncol*7, nrow*6))
+    fig, axes = plt.subplots(nrows=nrow, ncols=ncol, figsize=(ncol*7, nrow*6))
+    axes = axes.flat
 
     if 'subplots_adjust' in pt_dd:
         fig.subplots_adjust(**pt_dd['subplots_adjust'])
 
-    bins = pt_dd.get('bins', 36)
-    normed = pt_dd.get('normed', False)
-    contours = []
-
-    cutoff = pt_dd.get('cutoff', np.inf)
-    if cutoff == np.inf:
-        max_ = None
+    if 'bins' in pt_dd:
+        bins = np.arange(*pt_dd.get('bins'))
     else:
-        max_ = cutoff
-    for c, gk in enumerate(data.keys()):
-        ax = fig.add_subplot(nrow, ncol, c+1)
-        da = data[gk]
+        bins = np.arange(-180, 180, 4)
 
-        phis, psis = da
+    normed = pt_dd.get('normed', False)
 
-        # the order switch of psis and phis is due to implementation of
-        # histogram2d(), only after switch will the finally plot match what is
-        # expected
-        h, phi_edges, psi_edges = np.histogram2d(
-            psis, phis, range=[[-180,180], [-180,180]], 
-            bins=bins, normed=normed)
-        phi_edges = (phi_edges[1:] + phi_edges[:-1]) / 2.
-        psi_edges = (psi_edges[1:] + psi_edges[:-1]) / 2.
+    gk_xypmfs = []
+    min_, max_ = get_min_max(data, bins, normed, gk_xypmfs)
+    logger.info("min: {0}; max: {1}".format(min_, max_))
 
-        h_pmf = U.prob2pmf(h, h.max())
+    if 'levels' in pt_dd:
+        pre_levels = pt_dd['levels']
+        levels = np.arange(*pre_levels)
+        cutoff = levels[-1]
+    else:
+        # get_min_max calculate makes it possible that pmf get calculated
+        # twice, which is inefficient --2013-07-30
+        step = (max_ - min_) / 15 # 15 steps: arbitrary
+        levels = np.arange(min_, max_ + step, step) # + step: to ensure max_ is included in level
+        cutoff = np.inf
+    logger.info("levels for contourf: {0}".format(levels))
 
-        # lenx, leny = h_pmf.shape # len: length
-        # for _i in range(lenx):
-        #     for _j in range(leny):
-        #         if h_pmf[_i][_j] == np.inf:
-        #             h_pmf[_i][_j] = -np.inf
+    for c, (gk, phi_edges, psi_edges, h_pmf) in enumerate(gk_xypmfs):
+        ax = axes[c]
+
+        # get rid of values uninterested
         # faster then the above looping
         np.place(h_pmf, h_pmf>=cutoff, -np.inf)
 
         cmap = getattr(cm, pt_dd.get('cmap', 'jet'))
-        # this step can a while
-        F = U.timeit(ax.contourf)
-        contour = F(phi_edges, psi_edges, h_pmf, cmap=cmap)
-        fig.colorbar(contour, shrink=0.6, extend='both')
 
-        contours.append(contour)
-    
+        F = U.timeit(ax.contourf)
+        contour = F(phi_edges, psi_edges, h_pmf, cmap=cmap, levels=levels)
+
         decorate_ax(ax, pt_dd, ncol, nrow, c, gk, A)
 
-        if cutoff == np.inf:
-            ma = h_pmf.max()
-            if max_ is None or ma > max_:
-                max_ = ma
-
-    for _ in contours:
-        _.set_clim(0, max_)
+    cax = fig.add_axes([0.92, 0.2, 0.02, 0.6]) # left, bottom, width, hight
+    plt.colorbar(contour, cax=cax)
 
     plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
+
+def get_min_max(data, bins, normed, gk_xypmfs):
+    mins, maxs = [], []
+    for gk in data:
+        phis, psis = data[gk]
+        # the order switch of psis and phis is due to implementation of
+        # histogram2d(), only after switch will the finally plot match what is
+        # expected
+        h, x, y = np.histogram2d(psis, phis, range=HIST2D_RANGES, bins=bins, normed=normed)
+        x = (x[1:] + x[:-1]) / 2. # phi_edges
+        y = (y[1:] + y[:-1]) / 2. # psi_edges
+        pmf = U.prob2pmf(h, h.max())
+        gk_xypmfs.append([gk, x, y, pmf])
+
+        pmf1 = pmf.copy()
+        np.place(pmf1, pmf1<=-np.inf, np.inf) # without_neg_inf
+        pmf2 = pmf.copy()
+        np.place(pmf2, pmf2>=np.inf, -np.inf) # without_pos_inf
+        mins.append(pmf1.min())
+        maxs.append(pmf2.max())
+    return min(mins), max(maxs)
 
 @U.timeit
 def decorate_ax(ax, pt_dd, ncol, nrow, c, gk, A):
