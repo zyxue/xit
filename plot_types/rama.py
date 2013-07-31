@@ -88,13 +88,11 @@ def rama_pmf(data, A, C, **kw):
     if 'levels' in pt_dd:
         pre_levels = pt_dd['levels']
         levels = np.arange(*pre_levels)
-        cutoff = levels[-1]
     else:
         # get_min_max calculate makes it possible that pmf get calculated
         # twice, which is inefficient --2013-07-30
-        step = (max_ - min_) / 15 # 15 steps: arbitrary
+        step = (max_ - min_) / 10 # 15 steps: arbitrary
         levels = np.arange(min_, max_ + step, step) # + step: to ensure max_ is included in level
-        cutoff = np.inf
     logger.info("levels for contourf: {0}".format(levels))
 
     for c, (gk, phi_edges, psi_edges, h_pmf) in enumerate(gk_xypmfs):
@@ -102,9 +100,10 @@ def rama_pmf(data, A, C, **kw):
 
         # get rid of values uninterested
         # faster then the above looping
-        np.place(h_pmf, h_pmf>=cutoff, -np.inf)
+        # np.place(h_pmf, h_pmf>=cutoff, -np.inf)
 
         cmap = getattr(cm, pt_dd.get('cmap', 'jet'))
+        cmap.set_over('white')
 
         F = U.timeit(ax.contourf)
         contour = F(phi_edges, psi_edges, h_pmf, cmap=cmap, levels=levels)
