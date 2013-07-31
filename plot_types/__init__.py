@@ -4,7 +4,7 @@ from utils import timeit
 
 modules = []
 for mod_name in ['alx', 'bars', 'distr', 'pmf', 'imap', 'rama',
-                 'grped_bars', 'grped_distr', 'grped_along_var', 'grped_omega_distr',
+                 'grped_bars', 'grped_distr', 'grped_pmf', 'grped_along_var', 'grped_omega_distr',
                  'pot_ener_map']:
     # 'grped_bars', 'grped_distr', 'grped_distr_ave']:
     # http://docs.python.org/2/library/functions.html#__import__

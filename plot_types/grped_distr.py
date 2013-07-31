@@ -48,8 +48,11 @@ def grped_distr(data, A, C, **kw):
             if A.plot_type in ['grped_distr', 'grped_alx']:
                 ax.plot(da[0], da[1], **params)
                 # facecolor uses the same color as ax.plot
-                ax.fill_between(da[0], da[1]-da[2], da[1]+da[2], 
-                                where=None, facecolor=params.get('color'), alpha=.3)
+                if ('fill_between' not in pt_dd) or (pt_dd['fill_between'] == True):
+                    # the condition means that by default do fill_between
+                    # unless it is explicitly set to False
+                    ax.fill_between(da[0], da[1]-da[2], da[1]+da[2], 
+                                    where=None, facecolor=params.get('color'), alpha=.3)
             elif A.plot_type == 'grped_distr_ave':
                 # the data slicing can be confusing, refer to plot.py to see how to
                 # data is structured
@@ -89,13 +92,13 @@ def grped_distr(data, A, C, **kw):
                 tick.label1On = False
                 tick.label2On = True # move the ticks to the top 
 
-    if 'figlegend' in pt_dd:
-        leg = fig.legend(handles=ax.lines, **pt_dd['figlegend'])
         if 'legend_linewidth' in pt_dd:
-            for _ in leg.legendHandles:
+            leg = ax.get_legend()
+            lines = leg.get_lines()
+            for _ in lines:
                 _.set_linewidth(pt_dd['legend_linewidth'])
 
-    plt.savefig(utils.gen_output_filename(A, C))
+    plt.savefig(utils.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
 def grp_datasets(data, pt_dd):
     grp_REs = pt_dd['grp_REs']
@@ -144,6 +147,8 @@ def get_params(key, pt_dd):
         params['color'] = utils.get_param(pt_dd['colors'], key)
     if 'labels' in pt_dd:
         params['label'] = utils.get_param(pt_dd['labels'], key)
+    if 'linewidth' in pt_dd:
+        params['linewidth'] = pt_dd['linewidth']
     return params
 
 def decorate_ax(ax, pt_dd, ncol, nrow, c):
@@ -165,4 +170,5 @@ def decorate_ax(ax, pt_dd, ncol, nrow, c):
     if 'xlim' in pt_dd:   ax.set_xlim(**pt_dd['xlim'])
     if 'ylim' in pt_dd:   ax.set_ylim(**pt_dd['ylim'])
     if 'xscale' in pt_dd: ax.set_xscale(**pt_dd['xscale'])
-    if 'legend' in pt_dd: ax.legend(**pt_dd['legend'])
+    if 'legend' in pt_dd:
+        ax.legend(**pt_dd['legend'])

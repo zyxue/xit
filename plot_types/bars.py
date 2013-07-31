@@ -47,4 +47,6 @@ def bars(grps, A, C, **kw):
     else:
         ax.set_xticklabels(grps.keys(), rotation=20)
 
+    plt.tight_layout()          # sometime text could be hidden due to not
+                                # enough padding, then use this.
     plt.savefig(utils.gen_output_filename(A, C))
