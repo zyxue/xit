@@ -1,4 +1,5 @@
 import re
+import pickle
 import logging
 logger = logging.getLogger(__name__)
 from collections import OrderedDict
@@ -18,6 +19,9 @@ def grped_distr(data, A, C, **kw):
         ...
         }
     """
+    if A.plot_type in ['grped_distr_ave']:
+        for k in data.keys():
+            data[k] = pickle.loads(data[k])
 
     logger.info('start plotting {0} for \n{1}'.format(A.plot_type, pprint.pformat(data.keys())))
 
@@ -28,14 +32,13 @@ def grped_distr(data, A, C, **kw):
         _ = 'grped_alx'
 
     pt_dd = utils.get_pt_dd(C, A.property, _)
-
     dsets = grp_datasets(data,  pt_dd)
+    ncol, nrow = utils.gen_rc(len(dsets.keys()), pt_dd)
 
     fig = plt.figure(figsize=pt_dd.get('figsize', (12,9)))
     if 'subplots_adjust' in pt_dd:
         fig.subplots_adjust(**pt_dd['subplots_adjust'])
 
-    ncol, nrow = utils.gen_rc(len(dsets.keys()))
     logger.info('Chosen # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
     for c, dsetk in enumerate(dsets.keys()):
         ax = fig.add_subplot(nrow, ncol, c+1)
@@ -46,27 +49,27 @@ def grped_distr(data, A, C, **kw):
             da = dset['data'][kkey]
             params = get_params(kkey, pt_dd)
             if A.plot_type in ['grped_distr', 'grped_alx']:
-                ax.plot(da[0], da[1], **params)
+                line = ax.plot(da[0], da[1], **params)
                 # facecolor uses the same color as ax.plot
                 if ('fill_between' not in pt_dd) or (pt_dd['fill_between'] == True):
                     # the condition means that by default do fill_between
                     # unless it is explicitly set to False
                     ax.fill_between(da[0], da[1]-da[2], da[1]+da[2], 
-                                    where=None, facecolor=params.get('color'), alpha=.3)
+                                    where=None, facecolor=line[0].get_color(), alpha=.3)
             elif A.plot_type == 'grped_distr_ave':
                 # the data slicing can be confusing, refer to plot.py to see how to
                 # data is structured
-                ax.plot(da[0][0], da[0][1], **params)
+                line = ax.plot(da[0][0], da[0][1], **params)
                 # facecolor uses the same color as ax.plot
                 ax.fill_between(da[0][0], da[0][1]-da[0][2], da[0][1]+da[0][2], 
-                                where=None, facecolor=params.get('color'), alpha=.3)
+                                where=None, facecolor=line[0].get_color(), alpha=.3)
 
                 # now, plot the vertical bar showing the average value
                 m = da[1][0]    # mean
                 e = da[1][1]    # error
                 ax.plot([m,m], [0,1], color=params.get('color'))
                 ax.fill_betweenx([0,1], [m-e, m-e], [m+e, m+e],
-                                 where=None, facecolor=params.get('color'), alpha=.3)
+                                 where=None, facecolor=line[0].get_color(), alpha=.3)
 
         # plot a vertical line if needed, e.g. showing the time of convergence
         if 'vline' in pt_dd:
@@ -146,7 +149,11 @@ def get_params(key, pt_dd):
     if 'colors' in pt_dd:
         params['color'] = utils.get_param(pt_dd['colors'], key)
     if 'labels' in pt_dd:
-        params['label'] = utils.get_param(pt_dd['labels'], key)
+        v = utils.get_param(pt_dd['labels'], key)
+        if v:
+            params['label'] = v
+    else:
+        params['label'] = key
     if 'linewidth' in pt_dd:
         params['linewidth'] = pt_dd['linewidth']
     return params
