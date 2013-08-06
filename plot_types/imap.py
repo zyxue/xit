@@ -86,10 +86,9 @@ def get_params(gk, pt_dd):
     params = {}
     if 'cmap' in pt_dd:
         params['cmap'] = getattr(cm, pt_dd['cmap'])
-    if 'edgecolors' in pt_dd:
-        params['edgecolors'] = pt_dd['edgecolors']
-    else:
-        params['edgecolors'] = 'none'
+    if 'pcolor' in pt_dd:
+        for k in pt_dd['pcolor']:
+            params[k] = pt_dd['pcolor'][k]
 
     # The following only applies to imshow, does not apply to pcolor
     # if 'interpolation' in pt_dd:
