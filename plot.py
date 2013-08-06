@@ -41,10 +41,8 @@ def calc_fetch_or_overwrite(grps, prop_obj, data, A, C, h5):
          (calc_distr, 'distr'): ['distr', 'grped_distr'],
          (calc_distr_ave, 'distr_ave'): ['grped_distr_ave'],
          (calc_imap, 'imap'): ['imap'],
-         (calc_pmf, 'pmf'): ['pmf'],
+         (calc_pmf, 'pmf'): ['pmf', 'grped_pmf'],
          (calc_omega_distr, 'omega_distr'): ['grped_omega_distr'],
-
-
 
          # this is a quite specific type of analysis
          (calc_pot_ener_map, 'pot_ener_map'): ['pot_ener_map'],

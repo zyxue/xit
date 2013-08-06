@@ -11,7 +11,7 @@ def rama(**kw):
     # by g_rama
     for k in kw.keys():
         if re.match('var[0-9]+', k):
-            if re.match('sr[1-3]', kw[k]):
+            if re.match('^sr[1-3](?:_CT3)?$', kw[k]):
                 program = 'calc_rama.py'
                 
                 if kw['use_pro']:

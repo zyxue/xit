@@ -57,7 +57,7 @@ def grped_bars(data, A, C, **kw):
         autolabel(rects)
 
     decorate_ax(ax, pt_dd)
-    plt.savefig(U.gen_output_filename(A, C))
+    plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
     dsets = OrderedDict() # dsets: meaning further grouping, based on which ploting
                   # will be done
@@ -91,6 +91,10 @@ def get_params(gk, pt_dd):
     params = {}
     if 'colors' in pt_dd:
         params['color'] = U.get_param(pt_dd['colors'], gk)
+    if 'ecolor' in pt_dd:
+        params['ecolor'] = U.get_param(pt_dd['ecolors'], gk)
+    else:
+        params['ecolor'] = 'black'
     if 'labels' in pt_dd:
         params['label'] = U.get_param(pt_dd['labels'], gk)
     else:

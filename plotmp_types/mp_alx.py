@@ -17,14 +17,14 @@ def mp_alx(data, A, C, **kw):
     if 'subplots_adjust' in pt_dd:
         fig.subplots_adjust(**pt_dd['subplots_adjust'])
 
-    ncol, nrow = U.gen_rc(len(dsets.keys()))
+    ncol, nrow = U.gen_rc(len(dsets.keys()), pt_dd)
     logger.info('Chosen # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
     for c, sys_key in enumerate(dsets.keys()):
         ax = fig.add_subplot(nrow, ncol, c+1)
         for prop_key in dsets[sys_key]:
             da = dsets[sys_key][prop_key]
 
-            params = get_params(sys_key, prop_key, pt_dd)
+            params = get_params(sys_key, prop_key, pt_dd, c)
             ax.plot(da[0], da[1], **params)
             ax.fill_between(da[0], da[1]-da[2], da[1]+da[2], 
                             where=None, facecolor=params.get('color'), alpha=.3)
@@ -33,14 +33,15 @@ def mp_alx(data, A, C, **kw):
             ax.text(**U.get_param(pt_dd['texts'], sys_key))
 
         decorate_ax(ax, pt_dd, ncol, nrow, c)
-    plt.savefig(U.gen_output_filename(A, C))
+    plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
-def get_params(dsetk, prop_key, pt_dd):
+def get_params(dsetk, prop_key, pt_dd, c):
     params = {}
     if 'colors' in pt_dd:
         params['color'] = U.get_param(pt_dd['colors'], prop_key)
-    if 'labels' in pt_dd:
-        params['label'] = U.get_param(pt_dd['labels'], prop_key)
+    if c == 0:                  # to avoid duplicative legends for all subplots
+        if 'labels' in pt_dd:
+            params['label'] = U.get_param(pt_dd['labels'], prop_key)
     return params
 
 def grp_datasets(data, pt_dd):

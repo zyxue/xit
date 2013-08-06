@@ -21,7 +21,7 @@ def grped_along_var(data, A, C, **kw):
     ax_plot(ax, dsets, pt_dd, A)
 
     decorate_ax(ax, pt_dd)
-    plt.savefig(U.gen_output_filename(A, C))
+    plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
 def ax_plot(ax, dsets, pt_dd, A):
     for c, dsetk in enumerate(dsets.keys()):
@@ -31,9 +31,9 @@ def ax_plot(ax, dsets, pt_dd, A):
         params = get_params(dsetk, pt_dd)
         if A.v: logger.info('params for {0}: {1}'.format(dsetk, params))
         xs = pt_dd.get('xs', range(len(dset.keys())))
-        ax.plot(xs, means, **params)
+        line = ax.plot(xs, means, **params)
         ax.fill_between(xs, means-stds, means+stds,
-                        where=None, facecolor=params.get('color'), alpha=0.3)
+                        where=None, facecolor=line[0].get_color(), alpha=0.3)
     
 def group_datasets(data, grp_REs):
     dsets = odict() # dsets: meaning further grouping, based on which

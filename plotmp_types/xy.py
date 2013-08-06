@@ -94,12 +94,13 @@ def grped_xy(data, A, C, **kw):
     
     fig = plt.figure()
     ax = fig.add_subplot(111)
+
+    xp, yp = A.properties
+    if sorted([xp, yp]) == ['unv', 'upv']:                # this is plot specific
+        ax.plot([0,1], [0,1], '--')
+
     for dk in dsets.keys():
         dset = dsets[dk]
-        xp, yp = A.properties
-
-        if sorted([xp, yp]) == ['unv', 'upv']:                # this is plot specific
-            ax.plot([0,1], [0,1], '--')
 
         xda, yda = dset[xp], dset[yp]                       # da: data
 
@@ -137,19 +138,21 @@ def grped_xy(data, A, C, **kw):
                     # STRANGE! the order need to be reversed                                   
                     xy=(x2[0], y2[0]), xycoords='data',                                        
                     xytext=(x1[0], y1[0]), textcoords='data',                                  
-                    arrowprops=dict(arrowstyle="fancy", #linestyle="dashed",                   
-                                    color="purple",                                            
-                                    alpha=0.5,                                                 
-                                    shrinkA=10,                                                
-                                    shrinkB=10,                                                
-                                    connectionstyle="arc3,rad=-0.3",                           
+                    arrowprops=dict(arrowstyle="->", #linestyle="dashed",
+                                    # arrowstyle="fancy",
+                                    color="black",
+                                    alpha=1,
+                                    shrinkA=10,
+                                    shrinkB=10,
+                                    # connectionstyle="arc3,rad=-0.3",
+                                    connectionstyle="arc3",
                                     ),
                     )
 
     decorate_ax(ax, pt_dd)
 
 
-    plt.savefig(U.gen_output_filename(A, C))
+    plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
 def decorate_ax(ax, pt_dd):
     if 'grid' in pt_dd: ax.grid(**pt_dd['grid'])
