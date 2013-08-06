@@ -14,18 +14,18 @@ def pot_ener_map(data, A, C, **kw):
         data[k] = pickle.loads(data[k])
 
     adjust_minima(data)
-
-    logger.info('start potential energy map...')
     pt_dd = U.get_pt_dd(C, A.property, A.plot_type)
+    logger.info(pt_dd)
     
-    fig = plt.figure(figsize=pt_dd.get('figsize', (12,9)))
+    ncol, nrow = U.gen_rc(len(data.keys()), pt_dd)
+    fig, axes = plt.subplots(nrows=nrow, ncols=ncol, figsize=(ncol*7, nrow*6))
+    axes = axes.flat
+
     if 'subplots_adjust' in pt_dd:
         fig.subplots_adjust(**pt_dd['subplots_adjust'])
 
-    ncol, nrow = U.gen_rc(len(data.keys()), pt_dd)
-
     for c, gk in enumerate(data.keys()):
-        ax = fig.add_subplot(nrow, ncol, c+1)
+        ax = axes[c]
         [phis, psis], da = data[gk]
 
         # this is just for determining the proper levels
@@ -34,18 +34,19 @@ def pot_ener_map(data, A, C, **kw):
         # further process da, mainly about removing peaks
         if 'levels' in pt_dd:
             min_, max_, step = U.get_param(pt_dd['levels'], gk)
-            for i in range(da.shape[0]):
-                for j in range(da.shape[1]):
-                    v = da[i][j]
-                    if v > max_:
-                        da[i][j] = min_ - 100 * step # make it white arbitrarily
+            logger.info(
+                'min, max, step from pt_dd: {0}, {1}, {2}'.format(
+                    min_, max_, step))
 
         params = get_params(gk, pt_dd)
-
         contour = ax.contourf(phis, psis, da, **params)
-        plt.colorbar(contour, shrink=0.6, extend='both')
+
         decorate_ax(ax, gk, pt_dd, ncol, nrow, c)
 
+    cax = fig.add_axes([0.92, 0.2, 0.02, 0.6]) # left, bottom, width, hight
+    cbar = plt.colorbar(contour, cax=cax)
+    if 'cbar_ylabel' in pt_dd:
+        cbar.ax.set_ylabel(**pt_dd['cbar_ylabel'])
     plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
 def get_params(gk, pt_dd):
@@ -53,6 +54,7 @@ def get_params(gk, pt_dd):
     if 'cmaps' in pt_dd:
         # params['cmap'] = getattr(cm, U.get_param(pt_dd['cmaps'], gk))
         params['cmap'] = getattr(cm, pt_dd['cmaps'])
+        params['cmap'].set_over('white')
     if 'levels' in pt_dd:
         _ = U.get_param(pt_dd['levels'], gk)
         if _: 
@@ -69,11 +71,11 @@ def decorate_ax(ax, gk, pt_dd, ncol, nrow, c):
         # ax.get_xaxis().set_visible(False)                   # this hide the whole axis
     else:
         if 'xlabel' in pt_dd: 
-            ax.set_xlabel(**pt_dd['xlabel'])
+            ax.set_xlabel('$\phi$')
 
     if c % ncol == 0:
         if 'ylabel' in pt_dd:
-            ax.set_ylabel(**pt_dd['ylabel'])
+            ax.set_ylabel('$\psi$')
     else:
         ax.set_yticklabels([])
 
@@ -81,8 +83,16 @@ def decorate_ax(ax, gk, pt_dd, ncol, nrow, c):
         ax.grid(**pt_dd['grid'])
     else:
         ax.grid(which='both')
-    if 'xlim' in pt_dd:   ax.set_xlim(**pt_dd['xlim'])
-    if 'ylim' in pt_dd:   ax.set_ylim(**pt_dd['ylim'])
+
+    if 'xlim' in pt_dd:
+        ax.set_xlim(**pt_dd['xlim'])
+    else:
+        ax.set_xlim([-180, 180])
+    if 'ylim' in pt_dd:
+        ax.set_ylim(**pt_dd['ylim'])
+    else:
+        ax.set_ylim([-180, 180])
+
     if 'xscale' in pt_dd: ax.set_xscale(**pt_dd['xscale'])
     if 'titles' in pt_dd:
         ax.set_title(U.get_param(pt_dd['titles'], gk))
@@ -93,7 +103,6 @@ def adjust_minima(data):
     if len(data.keys()) <= 1:
         return
 
-    print data['sr1/ff4'][0]
     das = [data[i][1] for i in data.keys()]
 
     diff = [0]
