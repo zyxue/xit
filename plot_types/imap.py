@@ -41,9 +41,10 @@ def imap(data, A, C, **kw):
         da = data[gk]
         rda = da
 
-        # just for reference of seeing where the end points are
-        rda[-1][-1] = max_
-        rda[0][-1] = max_
+        # JUST FOR REFERENCE OF SEEING WHERE THE END POINTS ARE, DEBUGGING USES
+        # rda[-1][-1] = max_
+        # rda[0][-1] = max_
+
         # sophisticated reversal to make x axis donor, y axis acceptor
         # rda = np.array([i[::-1] for i in da.transpose()[::-1]])
 

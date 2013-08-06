@@ -30,7 +30,7 @@ def grped_along_var_2prop(data, A, C, **kw):
             ax2 = ax1.twinx()
             ax_plot(ax2, subdsets, pt_dd, A, i)
             decorate_ax(ax2, pt_dd, i)
-    plt.savefig(U.gen_output_filename(A, C))
+    plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
 def ax_plot(ax, dsets, pt_dd, A, i):
     """i tracks whether it's prop1 or prop2"""

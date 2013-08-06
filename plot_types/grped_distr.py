@@ -5,9 +5,12 @@ logger = logging.getLogger(__name__)
 from collections import OrderedDict
 import pprint
 
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
+from plot_types.pmf import calc_r2
 
 import utils
+from distr import gaussian
 
 @utils.is_plot_type
 def grped_distr(data, A, C, **kw):
@@ -70,6 +73,19 @@ def grped_distr(data, A, C, **kw):
                 ax.plot([m,m], [0,1], color=params.get('color'))
                 ax.fill_betweenx([0,1], [m-e, m-e], [m+e, m+e],
                                  where=None, facecolor=line[0].get_color(), alpha=.3)
+
+            if pt_dd.get('gaussian_fit'):
+                # maybe it's better to use p0 for curve_fit
+                popt, pcov = curve_fit(gaussian, da[0], da[1])
+                _, mu, sigma = popt
+                logger.info('mean of the fitted normal distribution: {0}'.format(mu))
+                new_ys = gaussian(da[0], *popt)
+                # pearsonr creates different value from that by calc_r2
+                # corr, p_val = pearsonr(ys, new_ys)
+                r2 = calc_r2(da[1], new_ys)
+                ax.plot(da[0], new_ys, linewidth="2", 
+                        color=params.get('color'), 
+                        label='r$^2$ = {0:.2f}'.format(r2))
 
         # plot a vertical line if needed, e.g. showing the time of convergence
         if 'vline' in pt_dd:
