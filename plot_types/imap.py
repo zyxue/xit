@@ -54,12 +54,21 @@ def imap(data, A, C, **kw):
         params = get_params(gk, pt_dd)
         logger.info(params)
         # cmap_options: hot, gist_heat, Orange (printer friendly)
-        im = ax.imshow(rda, origin="lower", vmin=0, vmax=1, **params)
+
+        # remove the info about the Hbonding information about first residue,
+        # which ACE, this make the final map easier to understand
+        rda = np.delete(np.delete(rda, 0, 0), 0, 1)
+
+        im = ax.pcolor(rda, **params)
 
         if 'clim' in pt_dd:
             im.set_clim(**pt_dd['clim'])
         else:
             im.set_clim(0, max_)
+
+        logger.info('shape after removal of the 0th residue: {0}'.format(rda.shape))
+        ax.set_xlim([0, rda.shape[0]])
+        ax.set_ylim([0, rda.shape[1]])
 
         ax.minorticks_on()
         decorate_ax(ax, pt_dd, gk)
@@ -77,8 +86,10 @@ def get_params(gk, pt_dd):
     params = {}
     if 'cmap' in pt_dd:
         params['cmap'] = getattr(cm, pt_dd['cmap'])
-    if 'interpolation' in pt_dd:
-        params['interpolation'] = pt_dd['interpolation']
+
+    # The following only applies to imshow, does not apply to pcolor
+    # if 'interpolation' in pt_dd:
+    #     params['interpolation'] = pt_dd['interpolation']
         # Acceptable values are None, ‘none’, ‘nearest’, ‘bilinear’, ‘bicubic’,
         # ‘spline16’, ‘spline36’, ‘hanning’, ‘hamming’, ‘hermite’, ‘kaiser’,
         # ‘quadric’, ‘catrom’, ‘gaussian’, ‘bessel’, ‘mitchell’, ‘sinc’,
@@ -94,3 +105,6 @@ def decorate_ax(ax, pt_dd, gk):
         ax.set_title(U.get_param(pt_dd['titles'], gk))
     else:
         ax.set_title(gk)
+
+    if 'grid' in pt_dd:
+        ax.grid(**pt_dd['grid'])
