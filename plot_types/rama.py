@@ -4,6 +4,7 @@ logger = logging.getLogger(__name__)
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
+from matplotlib.axes import Subplot
 
 import utils as U
 
@@ -69,7 +70,14 @@ def rama_pmf(data, A, C, **kw):
 
     ncol, nrow = U.gen_rc(len(data.keys()), pt_dd)
     fig, axes = plt.subplots(nrows=nrow, ncols=ncol, figsize=(ncol*7, nrow*6))
-    axes = axes.flat
+
+    # to make the data type consistent for following analysis.
+    # by the way, this is a very wiredly behaved api --2013-08-07
+    # http://matplotlib.org/api/pyplot_api.html?highlight=subplots#matplotlib.pyplot.subplots
+    if isinstance(axes, np.ndarray):
+        axes = axes.flat
+    elif isinstance(axes, Subplot):
+        axes = [axes]
 
     if 'subplots_adjust' in pt_dd:
         fig.subplots_adjust(**pt_dd['subplots_adjust'])
