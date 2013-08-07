@@ -115,9 +115,11 @@ def get_params(gk, pt_dd):
         params['cmap'] = getattr(cm, pt_dd['cmaps'])
         params['cmap'].set_over('white')
     if 'levels' in pt_dd:
-        min_, max_, step = pt_dd['levels']
-        # +1 so that max_ will be included in the final levels
-        params['levels'] = np.arange(min_, max_+1, step)
+        _ = U.get_param(pt_dd['levels'], gk)
+        if _: 
+            min_, max_, step = _
+            # +1 so that max_ will be included in the final levels
+            params['levels'] = np.arange(min_, max_+1, step)
 
     # the potential energy map usually does not need color and label decoration
     return params
