@@ -77,7 +77,8 @@ def rama_pmf(data, A, C, **kw):
     if 'bins' in pt_dd:
         bins = np.arange(*pt_dd.get('bins'))
     else:
-        bins = np.arange(-180, 180, 4)
+        bins = np.arange(-180, 171, 4)
+    logger.info('bins:\n {0}'.format(bins))
 
     normed = pt_dd.get('normed', False)
 
@@ -85,35 +86,41 @@ def rama_pmf(data, A, C, **kw):
     min_, max_ = get_min_max(data, bins, normed, gk_xypmfs)
     logger.info("min: {0}; max: {1}".format(min_, max_))
 
-    if 'levels' in pt_dd:
-        pre_levels = pt_dd['levels']
-        levels = np.arange(*pre_levels)
-    else:
-        # get_min_max calculate makes it possible that pmf get calculated
-        # twice, which is inefficient --2013-07-30
-        step = (max_ - min_) / 10 # 15 steps: arbitrary
-        levels = np.arange(min_, max_ + step, step) # + step: to ensure max_ is included in level
-    logger.info("levels for contourf: {0}".format(levels))
-
     for c, (gk, phi_edges, psi_edges, h_pmf) in enumerate(gk_xypmfs):
         ax = axes[c]
 
-        # get rid of values uninterested
-        # faster then the above looping
-        # np.place(h_pmf, h_pmf>=cutoff, -np.inf)
-
         cmap = getattr(cm, pt_dd.get('cmap', 'jet'))
         cmap.set_over('white')
+    
+        params = get_params(gk, pt_dd)
+        logger.info('params: {0}'.format(params))
 
         F = U.timeit(ax.contourf)
-        contour = F(phi_edges, psi_edges, h_pmf, cmap=cmap, levels=levels)
+        contour = F(phi_edges, psi_edges, h_pmf, **params)
 
         decorate_ax(ax, pt_dd, ncol, nrow, c, gk, A)
 
     cax = fig.add_axes([0.92, 0.2, 0.02, 0.6]) # left, bottom, width, hight
-    plt.colorbar(contour, cax=cax)
+    cbar = plt.colorbar(contour, cax=cax)
+    if 'cbar_ylabel' in pt_dd:
+        cbar.ax.set_ylabel(**pt_dd['cbar_ylabel'])
 
     plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
+
+@U.timeit
+def get_params(gk, pt_dd):
+    params = {}
+    if 'cmaps' in pt_dd:
+        # params['cmap'] = getattr(cm, U.get_param(pt_dd['cmaps'], gk))
+        params['cmap'] = getattr(cm, pt_dd['cmaps'])
+        params['cmap'].set_over('white')
+    if 'levels' in pt_dd:
+        min_, max_, step = pt_dd['levels']
+        # +1 so that max_ will be included in the final levels
+        params['levels'] = np.arange(min_, max_+1, step)
+
+    # the potential energy map usually does not need color and label decoration
+    return params
 
 def get_min_max(data, bins, normed, gk_xypmfs):
     mins, maxs = [], []
