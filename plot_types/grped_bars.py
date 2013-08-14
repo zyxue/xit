@@ -53,8 +53,10 @@ def grped_bars(data, A, C, **kw):
             ax.text(rect.get_x()+rect.get_width()/2., 1.05*height, '%.2f'%float(height),
                     ha='center', va='bottom')
 
-    for rects in rectss:
-        autolabel(rects)
+    f_autolabel = pt_dd.get('f_autolabel', True)
+    if f_autolabel:
+        for rects in rectss:
+            autolabel(rects)
 
     decorate_ax(ax, pt_dd)
     plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))

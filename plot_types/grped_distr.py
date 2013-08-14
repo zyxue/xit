@@ -83,9 +83,8 @@ def grped_distr(data, A, C, **kw):
                 # pearsonr creates different value from that by calc_r2
                 # corr, p_val = pearsonr(ys, new_ys)
                 r2 = calc_r2(da[1], new_ys)
-                ax.plot(da[0], new_ys, linewidth="2", 
-                        color=params.get('color'), 
-                        label='r$^2$ = {0:.2f}'.format(r2))
+                ax.plot(da[0], new_ys, linewidth="4", 
+                        color='black', label='r$^2$ = {0:.2f}'.format(r2))
 
         # plot a vertical line if needed, e.g. showing the time of convergence
         if 'vline' in pt_dd:
@@ -165,6 +164,7 @@ def get_params(key, pt_dd):
     if 'colors' in pt_dd:
         params['color'] = utils.get_param(pt_dd['colors'], key)
     if 'labels' in pt_dd:
+        print pt_dd['labels'], key
         v = utils.get_param(pt_dd['labels'], key)
         if v:
             params['label'] = v

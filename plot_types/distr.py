@@ -49,7 +49,7 @@ def distr(data, A, C, **kw):
                 # corr, p_val = pearsonr(ys, new_ys)
                 r2 = calc_r2(ys, new_ys)
                 ax.plot(xs, new_ys, linewidth="2", 
-                        color=params.get('color'), 
+                        color='black', 
                         label='r$^2$ = {0:.2f}'.format(r2))
                 
             decorate_ax(ax, pt_dd)

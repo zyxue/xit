@@ -394,7 +394,8 @@ def get_param(pt_dd_val, k):
         for _ in pt_dd_val:
             if re.search(_, k):
                 res.append(_)
-        v = pt_dd_val[max(res, key=lambda x: len(x))]
+        if res:
+            v = pt_dd_val[max(res, key=lambda x: len(x))]
     return v
 
 def is_plot_type(f):
