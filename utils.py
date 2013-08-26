@@ -11,6 +11,8 @@ from collections import OrderedDict
 from functools import update_wrapper
 from jinja2 import Template
 
+import settings as S
+
 import tables
 import numpy as np
 
@@ -95,18 +97,18 @@ def gen_rc(n, pt_dd={}):
         logger.info('found ncol_nrow in config file, # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
         return ncol, nrow
 
-    c = int(np.sqrt(n))
-    r = c
+    r = int(np.sqrt(n))
+    c = r
     if c * r == n:
         return c, r
     else:         # r * c < n                                                  
-        r = r + 1
-        if r * c < n:
-            ncol, nrow = c, r+1, 
+        c = c + 1
+        if c * r < n:
+            ncol, nrow = c + 1, r, 
         else:
             ncol, nrow = c, r
     logger.info('Chosen # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
-    return ncol, nrow
+    return ncol, nrow           # prefer longer ncol than nrow
 
 def split(l, group_size):
     """split a list into n chunks"""
@@ -208,6 +210,15 @@ def gen_io_files(target_dir, pf):
     """
 
     io_files = dict(
+        em_edrf = os.path.join(
+            target_dir, S.EQ_DIR_NAME, '{0}_em.edr'.format(pf)),
+        em_xtcf = os.path.join(
+            target_dir, S.EQ_DIR_NAME, '{0}_em.xtc'.format(pf)),
+        em_tprf = os.path.join(
+            target_dir, S.EQ_DIR_NAME, '{0}_em.tpr'.format(pf)),
+
+        # above are for filenames during equilibration process
+
         xtcf = os.path.join(
             target_dir, '{pf}_md.xtc'.format(pf=pf)),
         centerxtcf = os.path.join(
@@ -326,7 +337,7 @@ def get_prop_dd(C, prop_name, fvb=False):
 def get_pt_dd(C, prop_name, pt_name, fvb=False):
     """get the configuration for plot type or plotmp type (pt) under the plots
     section of .xitconfig"""
-    r = get_prop_dd(C, prop_name)
+    r = get_prop_dd(C, prop_name, fvb)
     if r:
         rr = r.get(pt_name)
         if rr:
@@ -379,10 +390,12 @@ def get_param(pt_dd_val, k):
     """find the exactly matched val or do regex search, or return None"""
     v = pt_dd_val.get(k)
     if not v:
+        res = []
         for _ in pt_dd_val:
             if re.search(_, k):
-                v = pt_dd_val[_]
-                break
+                res.append(_)
+        if res:
+            v = pt_dd_val[max(res, key=lambda x: len(x))]
     return v
 
 def is_plot_type(f):
@@ -457,3 +470,37 @@ def template_file(infile, opfile, **kwargs):
     s2 = template(s, **kwargs)
     opf.write(s2)
     logger.info('templated "{0}" to "{1}"'.format(infile, opfile))
+
+def signed_int(i):
+    """convert int_id in p100 or n100 to signed int as 100 or -100"""
+    return int(i[1:]) if i.startswith('p') else -int(i[1:])
+
+
+def prob2pmf(p, max_p, e=None):
+    """
+    p: p_x
+    max_p: p_x0
+    e: variance of p_x, used to calc error propagation
+
+    convert the probability of e2ed to potential of mean force
+    """
+
+    T = 300                                                 # Kelvin
+    # R = 8.3144621                                           # J/(K*mol)
+    R = 8.3144621e-3                                        # KJ/(K*mol)
+    # R = 1.9858775                                           # cal/(K*mol)
+    # pmf = - R * T * np.log(p / float(max_p))
+
+    # k = 1.3806488e-23                         # Boltzman constant J*K-1
+    pmf = - R * T * np.log(p / float(max_p))  # prefer to use k and Joule
+                                              # instead so I could estimate the
+    if e is not None:
+        e = e
+        # Now, calc error propagation
+        # since = pmf = -R * T * ln(p_x / p_x0)
+        # First, we calc the error of (p_x / p_x0)
+        # error_of_p_x_divided_by_p_x0 = e**2 / p_x0**2
+        pmf_e = -R * T * e / p
+        return pmf, pmf_e
+    else:
+        return pmf

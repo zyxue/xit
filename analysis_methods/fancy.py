@@ -1,14 +1,31 @@
 import os
+import re
 import utils
 
 def rama(**kw):
+    program = 'g_rama'
+    thetprf = kw['tprf']
+
+    # if the peptide is sr[1-3], use calc_rama.py since NH2 at N-ter in CHARMM
+    # force fields are part of the center residue and thus cannot be detected
+    # by g_rama
+    for k in kw.keys():
+        if re.match('var[0-9]+', k):
+            if re.match('^sr[1-3](?:_CT3)?$', kw[k]):
+                program = 'calc_rama.py'
+                
+                if kw['use_pro']:
+                    thetprf = kw['progrof']
+                else:
+                    thetprf = kw['grof']
+
     # g_rama only take tpr file
     thextcf = kw['proxtcf'] if kw['use_pro'] else kw['orderxtcf']
-    return "g_rama \
+    return "{program} \
 -f {thextcf} \
--s {tprf} \
+-s {thetprf} \
 -b {b} \
--o {anal_dir}/{id_}_rama.xvg".format(thextcf=thextcf, **kw)
+-o {anal_dir}/{id_}_rama.xvg".format(program=program, thextcf=thextcf, thetprf=thetprf, **kw)
 
 def seqspacing(**kw):
     dd = utils.get_anal_dd(kw['C'], 'seqspacing')

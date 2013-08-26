@@ -19,7 +19,8 @@ class convert_vars(argparse.Action):
             svalue = value.split()
             for val in svalue:
                 # not trivial a regex that works!
-                mat = re.search('([a-z]*)((?:[0-9]+|\[\d+-\d+\])?)', val)
+                # this does not work with names like sr1_CT3, g3ub
+                mat = re.match('([a-zA-Z_0-9]*)((?:\[\d+-\d+\])?)$', val)
                 if mat:                                     # mat: match
                     prefix, num = mat.groups()
                     if num == '':
@@ -57,8 +58,10 @@ def get_args(args_to_parse=None):
     prep_parser = subparsers.add_parser('prep', help='used during simulation preparation')
     mgrp = prep_parser.add_mutually_exclusive_group()
     mgrp.add_argument('-p', '--prepare', choices=[
-            'mkdir', 'link_gro', 'sed_top', 'sed_0_jobsub_sh', 'qsub_0_jobsub_sh',
-            'sed_0_mdrun_sh', 'qsub_0_mdrun_sh'])
+            'mkdir', 'link_gro', 'sed_top', 'sed_itp', 'sed_0_jobsub_sh', 'sed_0_mdrun_sh',
+            'qsub_0_jobsub_sh', 'exec_0_jobsub_sh', 'qsub_0_mdrun_sh'])
+    # exec_0_jobsub_sh is usually used when the equilibration doesn't take a long time
+
     prep_parser.add_argument('--overwrite', action='store_true', help='overwrite previous file when do sed')
 
     anal_parser = subparsers.add_parser(

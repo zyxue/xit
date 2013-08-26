@@ -1,12 +1,16 @@
 import re
+import pickle
 import logging
 logger = logging.getLogger(__name__)
 from collections import OrderedDict
 import pprint
 
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
+from plot_types.pmf import calc_r2
 
 import utils
+from distr import gaussian
 
 @utils.is_plot_type
 def grped_distr(data, A, C, **kw):
@@ -18,6 +22,9 @@ def grped_distr(data, A, C, **kw):
         ...
         }
     """
+    if A.plot_type in ['grped_distr_ave']:
+        for k in data.keys():
+            data[k] = pickle.loads(data[k])
 
     logger.info('start plotting {0} for \n{1}'.format(A.plot_type, pprint.pformat(data.keys())))
 
@@ -28,14 +35,13 @@ def grped_distr(data, A, C, **kw):
         _ = 'grped_alx'
 
     pt_dd = utils.get_pt_dd(C, A.property, _)
-
     dsets = grp_datasets(data,  pt_dd)
+    ncol, nrow = utils.gen_rc(len(dsets.keys()), pt_dd)
 
     fig = plt.figure(figsize=pt_dd.get('figsize', (12,9)))
     if 'subplots_adjust' in pt_dd:
         fig.subplots_adjust(**pt_dd['subplots_adjust'])
 
-    ncol, nrow = utils.gen_rc(len(dsets.keys()))
     logger.info('Chosen # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
     for c, dsetk in enumerate(dsets.keys()):
         ax = fig.add_subplot(nrow, ncol, c+1)
@@ -46,34 +52,49 @@ def grped_distr(data, A, C, **kw):
             da = dset['data'][kkey]
             params = get_params(kkey, pt_dd)
             if A.plot_type in ['grped_distr', 'grped_alx']:
-                ax.plot(da[0], da[1], **params)
+                line = ax.plot(da[0], da[1], **params)
                 # facecolor uses the same color as ax.plot
-                ax.fill_between(da[0], da[1]-da[2], da[1]+da[2], 
-                                where=None, facecolor=params.get('color'), alpha=.3)
+                if ('fill_between' not in pt_dd) or (pt_dd['fill_between'] == True):
+                    # the condition means that by default do fill_between
+                    # unless it is explicitly set to False
+                    ax.fill_between(da[0], da[1]-da[2], da[1]+da[2], 
+                                    where=None, facecolor=line[0].get_color(), alpha=.3)
             elif A.plot_type == 'grped_distr_ave':
                 # the data slicing can be confusing, refer to plot.py to see how to
                 # data is structured
-                ax.plot(da[0][0], da[0][1], **params)
+                line = ax.plot(da[0][0], da[0][1], **params)
                 # facecolor uses the same color as ax.plot
                 ax.fill_between(da[0][0], da[0][1]-da[0][2], da[0][1]+da[0][2], 
-                                where=None, facecolor=params.get('color'), alpha=.3)
+                                where=None, facecolor=line[0].get_color(), alpha=.3)
 
                 # now, plot the vertical bar showing the average value
                 m = da[1][0]    # mean
                 e = da[1][1]    # error
                 ax.plot([m,m], [0,1], color=params.get('color'))
                 ax.fill_betweenx([0,1], [m-e, m-e], [m+e, m+e],
-                                 where=None, facecolor=params.get('color'), alpha=.3)
+                                 where=None, facecolor=line[0].get_color(), alpha=.3)
+
+            if pt_dd.get('gaussian_fit'):
+                # maybe it's better to use p0 for curve_fit
+                popt, pcov = curve_fit(gaussian, da[0], da[1])
+                _, mu, sigma = popt
+                logger.info('mean of the fitted normal distribution: {0}'.format(mu))
+                new_ys = gaussian(da[0], *popt)
+                # pearsonr creates different value from that by calc_r2
+                # corr, p_val = pearsonr(ys, new_ys)
+                r2 = calc_r2(da[1], new_ys)
+                ax.plot(da[0], new_ys, linewidth="4", 
+                        color='black', label='r$^2$ = {0:.2f}'.format(r2))
 
         # plot a vertical line if needed, e.g. showing the time of convergence
         if 'vline' in pt_dd:
             vl = pt_dd['vline']
-            x = float(vl['x'])
+            x = vl['x']
             if 'y' in vl:
-                yb, ye = [float(i) for i in vl['y']]
+                yb, ye = vl['y']
             else:
                 yb, ye = ax.get_ylim()
-            ax.plot([x, x], [yb, ye], **vl.get('params', {}))
+            ax.plot([x, x], [yb, ye], **vl.get('vline_params', {}))
 
         decorate_ax(ax, pt_dd, ncol, nrow, c)
 
@@ -89,13 +110,13 @@ def grped_distr(data, A, C, **kw):
                 tick.label1On = False
                 tick.label2On = True # move the ticks to the top 
 
-    if 'figlegend' in pt_dd:
-        leg = fig.legend(handles=ax.lines, **pt_dd['figlegend'])
         if 'legend_linewidth' in pt_dd:
-            for _ in leg.legendHandles:
+            leg = ax.get_legend()
+            lines = leg.get_lines()
+            for _ in lines:
                 _.set_linewidth(pt_dd['legend_linewidth'])
 
-    plt.savefig(utils.gen_output_filename(A, C))
+    plt.savefig(utils.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
 def grp_datasets(data, pt_dd):
     grp_REs = pt_dd['grp_REs']
@@ -143,7 +164,14 @@ def get_params(key, pt_dd):
     if 'colors' in pt_dd:
         params['color'] = utils.get_param(pt_dd['colors'], key)
     if 'labels' in pt_dd:
-        params['label'] = utils.get_param(pt_dd['labels'], key)
+        print pt_dd['labels'], key
+        v = utils.get_param(pt_dd['labels'], key)
+        if v:
+            params['label'] = v
+    else:
+        params['label'] = key
+    if 'linewidth' in pt_dd:
+        params['linewidth'] = pt_dd['linewidth']
     return params
 
 def decorate_ax(ax, pt_dd, ncol, nrow, c):
@@ -165,4 +193,5 @@ def decorate_ax(ax, pt_dd, ncol, nrow, c):
     if 'xlim' in pt_dd:   ax.set_xlim(**pt_dd['xlim'])
     if 'ylim' in pt_dd:   ax.set_ylim(**pt_dd['ylim'])
     if 'xscale' in pt_dd: ax.set_xscale(**pt_dd['xscale'])
-    if 'legend' in pt_dd: ax.legend(**pt_dd['legend'])
+    if 'legend' in pt_dd:
+        ax.legend(**pt_dd['legend'])

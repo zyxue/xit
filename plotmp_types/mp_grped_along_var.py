@@ -28,7 +28,7 @@ def mp_grped_along_var(data, A, C, **kw):
             for _ in leg.legendHandles:
                 _.set_linewidth(pt_dd['legend_linewidth'])
 
-    plt.savefig(U.gen_output_filename(A, C))
+    plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
 def decorate_ax(ax, pt_dd, pt, ncol, nrow, c):
     """c: counter"""

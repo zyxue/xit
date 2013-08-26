@@ -172,13 +172,19 @@ class unv(tables.IsDescription):
     time = tables.Float32Col(pos=0)
     unv = tables.UInt32Col(pos=1)
 
-#################### rdf ####################
+######################################RDF######################################
 
 class rdf(tables.IsDescription):
     """rdf along the time trajectory"""
     radius = tables.Float32Col(pos=0)
     rdf = tables.Float32Col(pos=1)
 
+#############BELOW ARE SCHEMAS FOR PROPERTIES DURING EQUILIBRATION#############
+
+class pot_ener(tables.IsDescription):
+    """potential energy along the time during equilibration """
+    time = tables.Float32Col(pos=0)
+    pot_ener = tables.Float32Col(pos=1)
 
 SCHEMA_DICT = {
     'e2ed'          : e2ed,
@@ -248,7 +254,9 @@ SCHEMA_DICT = {
     'rdf_c3vp': rdf,
     
     # 'conf_entropy': (entropy, 'entropy with increasing sampling'),
-    
+
+    'pot_ener_em': pot_ener,
+
     }
 
 INTERESTED_FIELDS = {
@@ -288,6 +296,7 @@ INTERESTED_FIELDS = {
     'rdf_c2vp': 'rdf',
     'rdf_c3vp': 'rdf',
 
+    'pot_ener_em': 'pot_ener',
 
     }
 
