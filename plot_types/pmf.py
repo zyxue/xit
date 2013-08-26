@@ -149,11 +149,19 @@ def parabola(x, a, b, c):
     return  (a * x ** 2) + (b * x) + c
 
 def calc_r2(values, fit_values):
-    """calculate the correlation coefficients (R^2)"""
+    """
+    calculate the coefficient of determination (r^2)
+    ref: http://en.wikipedia.org/wiki/Coefficient_of_determination
+
+    for linear regression, r^2 is equal to the sample Pearson correlation
+    coefficient
+    """
     ave = np.average(values)
-    sst = sum((i - ave)**2 for i in values)
+    # sstot: total sum of squares
+    sstot = sum((i - ave)**2 for i in values)
+    # ssreg: regression sum of squares, aka. explained sum of squares
     ssreg = sum((i - ave)**2 for i in fit_values)
-    r_square = float(ssreg) / sst
+    r_square = float(ssreg) / sstot
     return r_square
 
 def convert_k(raw_k):
