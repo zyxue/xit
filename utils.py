@@ -117,7 +117,7 @@ def split(l, group_size):
         logger.info(
             'the length of l ({0}) is less than the size of groups ({1}), so split not executed and returned l'.format(
                 len(l), n))
-        return l
+        return [l]
     else:
         k = len(l) / n
         if k * n < len(l):
@@ -504,3 +504,26 @@ def prob2pmf(p, max_p, e=None):
         return pmf, pmf_e
     else:
         return pmf
+
+def calc_r2(values, fit_values):
+    """
+    calculate the coefficient of determination (r^2)
+    ref: http://en.wikipedia.org/wiki/Coefficient_of_determination
+
+    for linear regression, r^2 is equal to the sample Pearson correlation
+    coefficient
+    """
+    ave = np.average(values)
+    # sstot: total sum of squares
+    sstot = sum((i - ave)**2 for i in values)
+    # ssres: sum of squares of residuals, aka. residual sum of squares
+    ssres = sum((i - j)**2 for i, j in zip(fit_values, values))
+    r_square = 1 - float(ssres) / sstot
+
+    # THE FOLLOWING COMMENTED LINES CALCULATES THE EQUIVALENT FORM OF
+    # COEFFICIENT OF DETERMINATION THAT IS FITTED BASED ON OLS (ORDINARY LEAST
+    # SQUARE) MODEL
+    # ssreg: regression sum of squares, aka. explained sum of squares
+    # ssreg = sum((i - ave)**2 for i in fit_values)
+    # r_square = float(ssreg) / sstot
+    return r_square

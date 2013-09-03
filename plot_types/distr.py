@@ -7,7 +7,6 @@ from scipy.optimize import curve_fit
 from scipy.stats import pearsonr
 
 import utils as U
-from plot_types.pmf import calc_r2
 
 @U.is_plot_type
 def distr(data, A, C, **kw):
@@ -34,6 +33,7 @@ def distr(data, A, C, **kw):
             params = get_params(gk, pt_dd)
             # ax.errorbar(da[0], da[1], yerr=da[2], **params)
             xs, ys, es = da[0], da[1], da[2] # es: errors
+
             ax.plot(xs, ys, **params)
             ax.fill_between(xs, ys-es, ys+es, 
                             where=None, facecolor=params.get('color'), alpha=.3)
@@ -47,14 +47,16 @@ def distr(data, A, C, **kw):
                 new_ys = gaussian(xs, *popt)
                 # pearsonr creates different value from that by calc_r2
                 # corr, p_val = pearsonr(ys, new_ys)
-                r2 = calc_r2(ys, new_ys)
+                r2 = U.calc_r2(ys, new_ys)
                 ax.plot(xs, new_ys, linewidth="2", 
                         color='black', 
-                        label='r$^2$ = {0:.2f}'.format(r2))
+                        label='r$^2$ = {0:.3f}'.format(r2))
                 
             decorate_ax(ax, pt_dd)
 
-    plt.savefig(U.gen_output_filename(A, C))
+    output = U.gen_output_filename(A, C)
+    logger.info('saving to {0}'.format(output))
+    plt.savefig(output)
 
 def get_params(gk, pt_dd):
     params = {}

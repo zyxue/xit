@@ -14,7 +14,6 @@ def grped_pmf(data, A, C, **kw):
     logger.info('pt_dd: {0}'.format(pt_dd))
 
     dsets = grp_datasets(data,  pt_dd)
-    print dsets.keys()
     ncol, nrow = U.gen_rc(len(dsets.keys()), pt_dd)
     logger.info('col: {0}, row; {1}'.format(ncol, nrow))
 
@@ -53,13 +52,16 @@ def grped_pmf(data, A, C, **kw):
                 _pfits.append(_pfv)
                 _ks.append(convert_k(a))
                 _l0s.append(-b/(2*a))
+            logger.info('modulus values for {0}'.format(pt_dd['grp_REs'][dsetc]))
+            for _ in _ks:
+                logger.info(' {0}'.format(_))
 
             _pfit = np.mean(_pfits, axis=0)
             _k    = np.mean(_ks)                   # prefix it with _ to avoid confusion
             _ke   = U.sem(_ks)
             _l0   = np.mean(_l0s)
             _l0e  = U.sem(_l0s)
-            _r2   = calc_r2(pmfm, _pfit)
+            _r2   = U.calc_r2(pmfm, _pfit)
             _ky, _kye  = ky(_k, _l0, _ke, _l0e)
 
             ax.annotate('\n'.join(['k   = {0:.1f} $\pm$ {1:.1f} pN/nm'.format(_k, _ke),
@@ -122,14 +124,6 @@ def filter_pmf(pmf_data, cutoff=2.49):
 def parabola(x, a, b, c):
     """return the array containing values: a * x^2 + b * x + c"""
     return  (a * x ** 2) + (b * x) + c
-
-def calc_r2(values, fit_values):
-    """calculate the correlation coefficients (R^2)"""
-    ave = np.average(values)
-    sst = sum((i - ave)**2 for i in values)
-    ssreg = sum((i - ave)**2 for i in fit_values)
-    r_square = float(ssreg) / sst
-    return r_square
 
 def convert_k(raw_k):
     # raw_k in KJ/(mol*nm^2)
