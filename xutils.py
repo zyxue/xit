@@ -42,14 +42,6 @@ class convert_vars(argparse.Action):
             final.append(subfinal)
         setattr(namespace, self.dest, final)
 
-# class verify_xy(argparse.Action):
-#     def __call__(self, parser, namespace, values, option_string=None):
-#         if namespace.plot_type != 'xy':
-#             raise ValueError('--xyp should be specified only when doing --plot_type xy')
-#         if len(values) != 2:
-#             raise ValueError('values of --xyp must be two. e.g. "upup unun"')
-#         setattr(namespace, self.dest, values)
-
 @utils.timeit
 def get_args(args_to_parse=None):
     parser = argparse.ArgumentParser(description="xit helps you prepare, manage and analyze your simulations")
@@ -58,7 +50,7 @@ def get_args(args_to_parse=None):
     prep_parser = subparsers.add_parser('prep', help='used during simulation preparation')
     mgrp = prep_parser.add_mutually_exclusive_group()
     mgrp.add_argument('-p', '--prepare', choices=[
-            'mkdir', 'link_gro', 'sed_top', 'sed_itp', 'sed_0_jobsub_sh', 'sed_0_mdrun_sh',
+            'mkdir', 'sed_top', 'sed_itp', 'sed_0_jobsub_sh', 'sed_0_mdrun_sh',
             'qsub_0_jobsub_sh', 'exec_0_jobsub_sh', 'qsub_0_mdrun_sh'])
     # exec_0_jobsub_sh is usually used when the equilibration doesn't take a long time
 
