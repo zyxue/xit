@@ -261,7 +261,7 @@ def get_rama(h5, gk, grp, prop_obj, prop_dd, A, C):
 def calc_pmf(h5, gk, grp, prop_obj, prop_dd, A, C):
     pt_dd = U.get_pt_dd(C, A.property, A.plot_type)
     if 'bins' not in pt_dd:
-        raise ValueError('bins not found in {0}, but be specified when plotting pmf'.format(C.name))
+        raise ValueError('bins not found in {0}, but be specified when plotting pmf'.format(A.config))
     subgrps = U.split(grp, 10)                       # 10 is the group_size
     da = []
     for sp in subgrps:

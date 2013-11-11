@@ -10,8 +10,6 @@ import utils as U
 def prepare(A, C, core_vars):
     if A.prepare == 'mkdir':
         mkdir(core_vars, A, C)
-    # elif A.prepare == 'link_gro':
-    #     link_gro(core_vars, A, C)
     elif A.prepare in ['sed_top', 'sed_itp', 'sed_0_jobsub_sh']:
         sed_file(A.prepare, core_vars, A, C)
     elif A.prepare in ['qsub_0_jobsub_sh', 'exec_0_jobsub_sh', 'qsub_0_mdrun_sh']:
@@ -43,31 +41,6 @@ def mk_new_dir(p):
         logger.info('mkdir {0}'.format(p))
     else:
         logger.info('{0} ALREADY EXISTED'.format(p))
-
-# LINK_GRO SEEMS REDUNDANT SINCE src_gro CAN BE SPECIFIED IN
-# 0_jobsub.sh.template DIRECTLY --2013-07-23
-
-# def link_gro(core_vars, A, C):
-#     for cv in core_vars:
-#         src_gro = C['prep']['link_gro']['src_gro'].format(**cv)
-#         must_exist(src_gro)
-
-#         dpp = U.get_dpp(cv)
-#         eq_p = os.path.join(dpp, S.EQ_DIR_NAME)        
-
-#         must_exist(eq_p)
-
-#         if 'target_gro' in C['prep']['link_gro']:
-#             target_gro = os.path.join(
-#                 eq_p, os.path.basename(C['prep']['link_gro']['target_gro'].format(**cv)))
-#         else:
-#             target_gro = os.path.join(eq_p, os.path.basename(src_gro))
-
-#         if tar_ex_ow(target_gro, A.overwrite):
-#             print target_gro
-#             rel_src_gro = os.path.relpath(src_gro, os.path.dirname(target_gro))
-#             os.symlink(rel_src_gro, target_gro)
-#             logger.info('symlink: {0} -> {1}'.format(rel_src_gro, target_gro))
 
 def sed_file(key, core_vars, A, C):
     for cv in core_vars:
@@ -137,7 +110,7 @@ def tar_ex_ow(target_file, f_overwrite):
             os.remove(target_file)
         return True
     else:
-        logger.info('{0} ALREADY EXISTS. user --overwrite to overwrite previous one'.format(target_file))        
+        logger.info('{0} ALREADY EXISTS. use --overwrite to overwrite previous one'.format(target_file))        
 
 def path_exists(eq_p):
     if os.path.exists(eq_p):

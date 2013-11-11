@@ -7,12 +7,11 @@ import pprint
 
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
-from plot_types.pmf import calc_r2
 
-import utils
+import utils as U
 from distr import gaussian
 
-@utils.is_plot_type
+@U.is_plot_type
 def grped_distr(data, A, C, **kw):
     """
     data structure of data, an OrderedDict
@@ -34,9 +33,9 @@ def grped_distr(data, A, C, **kw):
     elif A.plot_type in ['grped_alx']:
         _ = 'grped_alx'
 
-    pt_dd = utils.get_pt_dd(C, A.property, _)
+    pt_dd = U.get_pt_dd(C, A.property, _)
     dsets = grp_datasets(data,  pt_dd)
-    ncol, nrow = utils.gen_rc(len(dsets.keys()), pt_dd)
+    ncol, nrow = U.gen_rc(len(dsets.keys()), pt_dd)
 
     fig = plt.figure(figsize=pt_dd.get('figsize', (12,9)))
     if 'subplots_adjust' in pt_dd:
@@ -82,9 +81,9 @@ def grped_distr(data, A, C, **kw):
                 new_ys = gaussian(da[0], *popt)
                 # pearsonr creates different value from that by calc_r2
                 # corr, p_val = pearsonr(ys, new_ys)
-                r2 = calc_r2(da[1], new_ys)
-                ax.plot(da[0], new_ys, linewidth="2", 
-                        color='black', label='r$^2$ = {0:.2f}'.format(r2))
+                r2 = U.calc_r2(da[1], new_ys)
+                ax.plot(da[0], new_ys, linewidth="4", 
+                        color='black', label='r$^2$ = {0:.3f}'.format(r2))
 
         # plot a vertical line if needed, e.g. showing the time of convergence
         if 'vline' in pt_dd:
@@ -116,7 +115,7 @@ def grped_distr(data, A, C, **kw):
             for _ in lines:
                 _.set_linewidth(pt_dd['legend_linewidth'])
 
-    plt.savefig(utils.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
+    plt.savefig(U.gen_output_filename(A, C), **pt_dd.get('savefig', {}))
 
 def grp_datasets(data, pt_dd):
     grp_REs = pt_dd['grp_REs']
@@ -154,7 +153,7 @@ def grp_datasets(data, pt_dd):
     #     }
     return dsets
 
-@utils.is_plot_type
+@U.is_plot_type
 def grped_distr_ave(data, A, C, **kw):
     """it's a variant of grped_distr by adding mean values in the distribution plot """
     grped_distr(data, A, C, **kw)
@@ -162,10 +161,10 @@ def grped_distr_ave(data, A, C, **kw):
 def get_params(key, pt_dd):
     params = {}
     if 'colors' in pt_dd:
-        params['color'] = utils.get_param(pt_dd['colors'], key)
+        params['color'] = U.get_param(pt_dd['colors'], key)
     if 'labels' in pt_dd:
         print pt_dd['labels'], key
-        v = utils.get_param(pt_dd['labels'], key)
+        v = U.get_param(pt_dd['labels'], key)
         if v:
             params['label'] = v
     else:
