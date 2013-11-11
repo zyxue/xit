@@ -12,7 +12,7 @@ def pmf(data, A, C, **kw):
     ncol, nrow = U.gen_rc(len(data.keys()), pt_dd)
     logger.info('pt_dd: {0}'.format(pt_dd))
 
-    fig = plt.figure(figsize=(ncol*4, ncol*3))
+    fig = plt.figure(figsize=(ncol*4, nrow*3))
 
     col, row = U.gen_rc(len(data.keys()))
     logger.info('col: {0}, row; {1}'.format(col, row))
