@@ -1,4 +1,0 @@
-preparation
-===============================
-
-.. automodule:: xit.prep

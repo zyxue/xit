@@ -1,3 +1,13 @@
+"""
+Transform
+===========
+
+Functions:
+----------
+.. autofunction:: init_hdf5
+
+"""
+
 import os
 import logging
 logger = logging.getLogger(__name__)

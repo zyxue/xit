@@ -1,3 +1,16 @@
+"""
+Utilities
+==========
+
+Here contains basic util functions, this module shall not import any other
+local xit-specific modules
+
+Functions:
+----------
+
+.. autofunction:: runit
+"""
+
 import os
 import re
 import time
@@ -15,11 +28,6 @@ import settings as S
 
 import tables
 import numpy as np
-
-"""
-Here contains basic util functions, this module shall not import any other
-local xit-specific modules
-"""
 
 def decorator(d):
     "Make function d a decorator: d wraps a function fn."

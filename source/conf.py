@@ -12,6 +12,7 @@
 # serve to show the default.
 
 import sys, os
+# sphinx must be able import the module to be documented
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 print sys.path
 
@@ -242,3 +243,7 @@ texinfo_documents = [
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
+
+# learned from
+# http://sphinx-doc.org/ext/autodoc.html#confval-autodoc_default_flags
+autodoc_default_flags = ['members', 'undoc-members']

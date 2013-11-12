@@ -1,1 +1,0 @@
-Search.setIndex({objects:{},terms:{modul:0,indic:0,iter:[],tabl:0,index:0,welcom:0,titl:[],enumer:[],content:0,start:[],xit:0,sequenc:[],document:0,prep:[],"return":[],tupl:[],search:0,prepar:[0,1],list:[],yield:[],item:[],thi:[],page:0},objtypes:{},titles:["Welcome to xit&#8217;s documentation!","preparation"],objnames:{},filenames:["index","prep"]})

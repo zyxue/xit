@@ -12,6 +12,8 @@ Contents:
    :maxdepth: 2
 
    prep
+   transform
+   utils
 
 Indices and tables
 ==================
