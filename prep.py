@@ -8,6 +8,12 @@ import settings as S
 import utils as U
 
 def prepare(A, C, core_vars):
+    """
+    .. py:function:: enumerate(sequence[, start=0])
+
+   Return an iterator that yields tuples of an index and an item of the
+   *sequence*. (And so on.)
+   """
     if A.prepare == 'mkdir':
         mkdir(core_vars, A, C)
     elif A.prepare in ['sed_top', 'sed_itp', 'sed_0_jobsub_sh']:
