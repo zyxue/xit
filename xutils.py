@@ -44,6 +44,10 @@ class convert_vars(argparse.Action):
 
 @utils.timeit
 def get_args(args_to_parse=None):
+    """
+    :param args_to_parse list of arguments
+    :type args_to_parse list
+    """
     parser = argparse.ArgumentParser(description="xit helps you prepare, manage and analyze your simulations")
     subparsers = parser.add_subparsers(title='subcommands')
 
