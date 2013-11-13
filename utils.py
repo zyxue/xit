@@ -161,45 +161,6 @@ def gen_id_paths_r(vars_, dir_templates, id_template='', result=[], **kw):
             gen_id_paths_r(vars_copy, dir_templates, id_template, **kw_copy)
     return result
 
-def gen_core_vars_r(vars_, dir_tmpls, id_tmpl='', result=[], **kw):
-    """_r means recursion"""
-    if not vars_:
-        # cv: core vars
-        cv = {}
-        dirnames = {_:dir_tmpls[_].format(**kw) for _ in dir_tmpls}
-        dirnames = OrderedDict(sorted(dirnames.items(), key=lambda i: i[0]))
-        cv.update(dirnames)
-        cv.update(id_=id_tmpl.format(**kw))
-        cv.update(kw)
-        pathnames = dirnames.values()
-        for i in xrange(len(pathnames)):
-            cv.update({'path{0}'.format(i+1):os.path.join(*pathnames[0:i+1])})
-        result.append(cv)
-    else:
-        k, val = vars_.popitem()
-        for v in val:
-            kw_copy = {i:kw[i] for i in kw}
-            kw_copy.update({k:v})
-            vars_copy = {i:vars_[i] for i in vars_}
-            gen_core_vars_r(vars_copy, dir_tmpls, id_tmpl, **kw_copy)
-    return result
-
-def get_vars(A, C):
-    CS = C['systems']
-    if A.vars:
-        vars_ = {'var{0}'.format(k+1):v for k, v in enumerate(A.vars)}
-    else:
-        vars_ = {k:CS[k] for k in CS.keys() if re.match('var[0-9]+', k)}
-    vars_ = OrderedDict(sorted(vars_.items(), key=lambda i: i[0]))
-    return vars_
-
-def get_dir_tmpls(A, C):
-    CS = C['systems']
-    dir_tmpls = {k:CS[k] for k in CS.keys() if re.match('dir[0-9]+', k)}
-    # sorted dir_tmpls by keys, the number in particular
-    dir_tmpls = OrderedDict(sorted(dir_tmpls.items(), key=lambda t:t[0]))
-    return dir_tmpls
-
 # def gen_paths(dirs, dirname='', result=[]):
 #     if not dirs:
 #         result.append(dirname)
