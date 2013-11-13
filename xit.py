@@ -15,9 +15,9 @@ yaml.add_constructor('!include', yaml_utils.include)
 import utils
 import xutils
 
-def main():
+def main(cmd_args):
     logger.info('INIT: parsing arguments...')
-    A = xutils.get_args()
+    A = xutils.get_args(cmd_args)
     logger.info('INIT: got loglevel: {0}'.format(A.loglevel.upper()))
 
     logging.basicConfig(format='%(levelname)s|%(asctime)s|%(name)s:%(message)s',
@@ -56,4 +56,4 @@ def main():
         plotmp.plotmp(A, C, core_vars)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
