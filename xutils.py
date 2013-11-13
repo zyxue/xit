@@ -3,10 +3,9 @@ import argparse
 import logging
 logger = logging.getLogger(__name__)
 
-import utils
-from analysis_methods import PROPERTIES, ANALYSIS_METHODS
-from plot_types import PLOT_TYPES
-from plotmp_types import PLOTMP_TYPES
+# from analysis_methods import PROPERTIES, ANALYSIS_METHODS
+# from plot_types import PLOT_TYPES
+# from plotmp_types import PLOTMP_TYPES
 
 """Here contains not as basic util functions that need to import import any
 other local xit-specific modules"""
@@ -42,7 +41,6 @@ class convert_vars(argparse.Action):
             final.append(subfinal)
         setattr(namespace, self.dest, final)
 
-@utils.timeit
 def get_args(args_to_parse=None):
     """
     :param args_to_parse list of arguments
@@ -85,7 +83,10 @@ def get_args(args_to_parse=None):
 
     plot_parser = subparsers.add_parser(
         'plot', help='postprocess the results from analysis and illustrate it via plotting')
-    plot_parser.add_argument('--plot_type', choices=PLOT_TYPES.keys(), help='e.g {0}'.format(PLOT_TYPES.keys()))
+
+    plot_parser.add_argument('--plot_type', choices='LELE', help='NEED A NEW STRATEGY TO LIST THIS')
+    # plot_parser.add_argument('--plot_type', choices=PLOT_TYPES.keys(), help='e.g {0}'.format(PLOT_TYPES.keys()))
+
     # plot_parser.add_argument('--scale', action='store_true', help='scale to 1, when map plotting is not obvious')
 
     # shouldn't be used, instead put it in the .xitconfig.yaml --2013-05-09
@@ -93,7 +94,8 @@ def get_args(args_to_parse=None):
 
     plotmp_parser = subparsers.add_parser(
         'plotmp', help='similar to plot, but handles two properties at the same time')
-    plotmp_parser.add_argument('--plotmp_type', choices=PLOTMP_TYPES.keys(), help='{0}'.format(PLOTMP_TYPES.keys()))
+    plotmp_parser.add_argument('--plotmp_type', choices='LELE', help='NEED A NEW STRATEGY TO LIST THIS')
+    # plotmp_parser.add_argument('--plotmp_type', choices=PLOTMP_TYPES.keys(), help='{0}'.format(PLOTMP_TYPES.keys()))
     plotmp_parser.add_argument('-p' , '--properties', nargs='+',
                                help=('added MULTIPLE properties, which is different '
                                      'than a single property in plot. e.g. "upup unun"'))
@@ -119,10 +121,12 @@ def get_args(args_to_parse=None):
         p.add_argument('--vvv', action='store_true', help="enable very very verbose output")
 
     for p in [anal_parser]:
-        p.add_argument('-a' , '--analysis', required=True, help='{0}'.format(ANALYSIS_METHODS.keys()))
+        p.add_argument('-a' , '--analysis', required=True, help='NEED A NEW STRATEGY TO LIST THIS')
+        # p.add_argument('-a' , '--analysis', required=True, help='{0}'.format(ANALYSIS_METHODS.keys()))
 
     for p in [transform_parser, plot_parser]:
-        p.add_argument('-p' , '--property', help='{0}'.format(PROPERTIES.keys()))
+        p.add_argument('-p' , '--property', help='NEED A NEW STRATEGY TO LIST THIS')
+        # p.add_argument('-p' , '--property', help='{0}'.format(PROPERTIES.keys()))
 
     for p in [anal_parser, transform_parser, plot_parser, plotmp_parser]:
         p.add_argument('--hdf5', help='specify the .h5 file to use if not configured in .xitconfig.yaml')
