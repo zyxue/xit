@@ -41,7 +41,7 @@ class convert_vars(argparse.Action):
             final.append(subfinal)
         setattr(namespace, self.dest, final)
 
-def get_args(args_to_parse=None):
+def get_cmd_args(args_to_parse=None):
     """
     :param args_to_parse list of arguments
     :type args_to_parse list

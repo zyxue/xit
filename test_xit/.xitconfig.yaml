@@ -1,0 +1,60 @@
+systems:
+  var1: [epz1]
+  var2: [h]
+  var3: [8]
+  var4: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09']
+
+  dir1: '{var1}'
+  dir2: '{var2}'
+  dir3: '{var3}'
+  dir3: '{var4}'
+  id: '{var1}{var2}{var3}_{var4}'
+
+data:
+  repository: 'repository'                            # mdp, templates, etc.
+  analysis  : 'analysis'                              # plain text results
+  scripts   : 'scripts'                               # for analysis scripts
+  plots     : 'plots'                                 # for storing pictures
+  log       : 'log'                                   # for storing pictures
+
+hdf5:
+    title: 'aggregates of 8 epz1'
+    filename: epz1.h5
+
+prep:
+  link_gro:
+    src_gro: 'repository/system_prep/{var2}/{var1}{var2}{var3}.gro'
+    # the name format of the basename of target gro
+    target_gro: '{var1}{var2}{var3}.gro'
+
+  sed_top:
+    top_tmpl: 'repository/top.template'
+
+  sed_0_jobsub_sh:
+    jobsub_tmpl: 'repository/0_jobsub.sh.template'
+
+  sed_0_mdrun_sh:
+    mdrun_tmpl: 'repository/0_mdrun.sh.template'
+
+# anal: !include .xitconfig_anal.yaml
+
+# plot:
+#   rg_c_alpha:
+#     bars:
+#       ylabel: {ylabel: rg_c_alpha}
+#     grped_bars: # this is based onthe format of grptoken in the commandline
+#       grp_REs: ['w300/sq[36a]', 'm300/sq[36a]', 'e300/sq[36a]', 'n300/sq[36a]', 'h300/sq[36a]', 'c300/sq[36a]', 'o300/sq[36a]']
+#       colors: ['red', 'blue', 'green', '#FF9900', '#097054', '#666666', 'cyan']
+#       legends: [water, methanol, ethanol, pentanol, heptanol, octanol, octane]
+#       ylabel: {ylabel: '$R_g$', labelpad: 10}
+#       xticklabels: {labels: ['(PGV)12', '(GV)18', '(G)36']}
+#     alx: 
+#       xlim: {left: 150, right: 300}
+#       ylim: {bottom: 0.75, top: 1.0}
+#       xlabel: {xlabel: 'time (ns)'}
+#       ylabel: {ylabel: 'rg_c_alpha'}
+#     distr:
+#       bins: [0, 2.3, 0.04]
+#       colors: {w300: red, m300: blue}
+#       xlim: {left: 0.6, right: 2.3}
+#       ylim: {bottom: -0.05, top: 0.25}

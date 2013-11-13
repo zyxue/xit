@@ -22,21 +22,45 @@ def get_vars_from_cmd(variables):
 def get_vars_from_config(config):
     return {k:config[k] for k in config.keys() if re.match('var[0-9]+', k)}
 
-def get_vars(A, C):
+def get_vars(cmd_vars, config_vars):
     """
     generate an OrderedDict instance of variables from cmd arguments or the
-    configuration file
-    """
-    if A.vars:                  # cmd has higher priority over configuration
-        vars_ = get_vars_from_cmd(A.vars)
-    else:
-        vars_ = get_vars_from_config(C['system'])
+    configuration file.
 
-    vars_ = OrderedDict(sorted(vars_.items(), key=lambda i: i[0]))
-    return vars_
+    e.g.
+
+    ``
+    {var1: ['epz1'],
+     var2: ['h'],
+     var3: [8],
+     var4: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09']
+     }
+     ``
+    """
+
+    if cmd_vars:                  # cmd has higher priority over configuration
+        vars_ = get_vars_from_cmd(cmd_vars)
+    else:
+        vars_ = get_vars_from_config(config_vars)
+
+    ret = OrderedDict(sorted(vars_.items(), key=lambda i: i[0]))
+    return ret
+
+def get_dir_templates(config_dirs):
+    dir_tmpls = {k:config_dirs[k] 
+                 for k in config_dirs.keys() if re.match('dir[0-9]+', k)}
+
+    # sorted dir_tmpls by keys, the digit in the end in particular
+    dir_tmpls = OrderedDict(sorted(dir_tmpls.items(), key=lambda t:t[0]))
+    return dir_tmpls
 
 def gen_core_vars_r(vars_, dir_tmpls, id_tmpl='', result=[], **kw):
-    """_r means recursion"""
+    """
+    generate a dict core variables for each individual replica, keys include
+    var[0-9]*, path[0-9]*, id_. As a whole, a list is returned
+
+    _r means recursion
+    """
     if not vars_:
         # cv: core vars
         cv = {}
@@ -58,37 +82,44 @@ def gen_core_vars_r(vars_, dir_tmpls, id_tmpl='', result=[], **kw):
             gen_core_vars_r(vars_copy, dir_tmpls, id_tmpl, **kw_copy)
     return result
 
-def get_dir_tmpls(A, C):
-    CS = C['systems']
-    dir_tmpls = {k:CS[k] for k in CS.keys() if re.match('dir[0-9]+', k)}
-    # sorted dir_tmpls by keys, the number in particular
-    dir_tmpls = OrderedDict(sorted(dir_tmpls.items(), key=lambda t:t[0]))
-    return dir_tmpls
+def format_dict(ordered_dict):
+    ret = ['']
+    for k, v in ordered_dict.items():
+        ret.append('          {0}: {1}'.format(k, v))
+    return '\n'.join(ret)
 
 def main(cmd_args):
-    logger.info('INIT: parsing arguments...')
-    A = xU.get_args(cmd_args)
-    logger.info('INIT: got loglevel: {0}'.format(A.loglevel.upper()))
+    sys.stdout.write('INIT: parsing arguments...\n')
+    A = xU.get_cmd_args(cmd_args)
 
-    logging.basicConfig(format='%(levelname)s|%(asctime)s|%(name)s:%(message)s',
-                        level=getattr(logging, A.loglevel.upper()))
+    logging.basicConfig(
+        format='%(levelname)s|%(asctime)s|%(name)s:%(message)s',
+        level=getattr(logging, A.loglevel.upper()))
+    logger.info('Obtained loglevel: {0}'.format(A.loglevel.upper()))
 
-    config = A.config
-    if not os.path.exists(config):
-        raise IOError("{0} cannot found".format(config))
+    config_file = A.config
+    if not os.path.exists(config_file):
+        raise IOError("{0} cannot found".format(config_file))
 
-    logger.info('reading configuration file: {0}'.format(config))
+    logger.info('Parsing configuration file: {0}'.format(config_file))
+    C = yaml.load(open(config_file))
 
-    C = yaml.load(open(config))                                  # config_params
-    vars_ = get_vars(A, C)
-    logger.info(vars_)
-    dir_tmpls = get_dir_tmpls(A, C)
-    id_tmpl = C['systems']['id']
-    core_vars = gen_core_vars_r(vars_, dir_tmpls, id_tmpl)
-    logger.debug(pprint.pformat(core_vars))
 
-    # sys.exit(1)
-    subcmd = sys.argv[1]                                    # subcommand
+    vars_ = get_vars(A.vars, C['systems'])
+    logger.info('Extracted variables: {0}'.format(format_dict(vars_)))
+    
+
+    dir_templates = get_dir_templates(C['systems'])
+    logger.info('Extracted dir templates: {0}'.format(format_dict(dir_templates)))
+
+
+    id_template = C['systems']['id']
+    logger.info('Extracted id template: {0}'.format(id_template))
+
+    core_vars = gen_core_vars_r(vars_, dir_templates, id_template)
+    logger.debug(pprint.pformat((core_vars)))
+
+    subcmd = sys.argv[1]        # subcommand
     if subcmd == 'prep':
         import prep
         prep.prepare(A, C, core_vars)

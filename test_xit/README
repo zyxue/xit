@@ -1,0 +1,2 @@
+default:
+	python -m cProfile -s cum /home/zyxue/zx_local/xit/xit.py -h > time.log 2>&1
