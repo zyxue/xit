@@ -1,0 +1,18 @@
+#include "martini/martini_v2.2.itp"
+#include "martini/martini_v2.0_ions.itp"
+    
+#include "martini/{{var1}}_{{var2}}_dih.itp"
+    
+#ifdef POSRES
+  #include "martini/{{var1}}_{{var2}}_posres.itp"
+#endif
+
+[ system ]
+; name
+{{id_}}
+    
+[ molecules ]
+; name        number
+{{var1}}_{{var2}}	8
+W	      24000
+CL-	      64

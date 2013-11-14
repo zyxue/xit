@@ -1,0 +1,11 @@
+#include "martini/martini_v2.2.itp"
+    
+#include "martini/epz1_h_dih.itp"
+
+[ system ]
+; name
+epz1_h8
+    
+[ molecules ]
+; name        number
+epz1_h        8

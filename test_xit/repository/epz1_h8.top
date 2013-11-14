@@ -1,0 +1,19 @@
+#include "martini/martini_v2.2.itp"
+#include "martini/martini_v2.0_ions.itp"
+    
+#include "martini/epz1_{{var2}}_dih.itp"
+    
+#ifdef POSRES
+  #include "martini/epz1_h_posres.itp"
+#endif
+
+[ system ]
+; name
+epz1_{{var2}}8
+    
+[ molecules ]
+; name        number
+epz1_{{var2}} 8
+W	      24000
+CL-	      64
+

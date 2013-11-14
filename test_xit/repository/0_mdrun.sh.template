@@ -1,0 +1,50 @@
+#!/bin/bash
+
+#PBS -l nodes=2:ppn=8,walltime=48:00:00
+#PBS -m bea
+#PBS -M alfred532008@gmail.com
+#PBS -N {{id_}}
+
+export PATH=${HOME}/exec/gromacs-4.5.5/exec/bin:${PATH}
+
+# replica specific
+NAME={{id_}}
+
+# system specific
+NPME=0
+
+# cluster specific
+ROT_MACH=gpc04			   # machine name to ssh to and do qsub
+QSUB=/opt/torque/bin/qsub
+ALRUN="mpirun -np 32 mdrun_mpi -noappend"
+MAXH=48
+
+cd ${PBS_O_WORKDIR}
+PF=${NAME}_md						    # prefix
+TPRF=${PF}.tpr
+CPOF=${PF}.cpt
+CPIF=${PF}.cpt
+DNM1=${PF}		# part0001 for gromacs-4.5.5 after specifying -noappend
+DNM2=${PF}		# for continuation
+CPT=60			# time interval to write cpt file
+
+counter=${COUNTER}
+((counter+=1))
+# Only modified variable options
+if [ $counter -le 1 ]; then
+    VOPT="-cpo ${CPOF} -deffnm ${DNM1}"
+else
+    VOPT="-cpi ${CPOF} -deffnm ${DNM2}"
+fi
+# Starting mdrun
+${ALRUN} ${VOPT} -s ${TPRF} -maxh ${MAXH} -cpt ${CPT} -npme ${NPME}
+
+if [ $(mdtime.py --comp ${CPOF} ${TPRF}) == 'True' ]; then
+    NEW_NAME=${NAME}t$(mdtime.py -f ${CPOF})
+    ssh ${ROT_MACH} \
+"  cd ${PBS_O_WORKDIR}; sleep $(($RANDOM/1000));
+   ${QSUB} ./0_mdrun.sh \
+	-v COUNTER=${counter} \
+        -N ${NEW_NAME}
+"
+fi
