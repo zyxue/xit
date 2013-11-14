@@ -1,5 +1,5 @@
 systems:
-  var1: [epz1]
+  var1: [test_epz1]
   var2: [h, e]
   var3: [8]
   var4: ['00', '01', '02']
@@ -18,20 +18,15 @@ data:
   log       : 'log'                                   # for storing pictures
 
 hdf5:
-    title: 'aggregates of 8 epz1'
-    filename: epz1.h5
+    title: 'aggregates of 8 test_epz1'
+    filename: test_epz1.h5
 
 prep:
-  sed_files:
-
-  sed_top:
-    top_tmpl: 'repository/top.template'
-
-  sed_0_jobsub_sh:
-    jobsub_tmpl: 'repository/0_jobsub.sh.template'
-
-  sed_0_mdrun_sh:
-    mdrun_tmpl: 'repository/0_mdrun.sh.template'
+  sed_templates:
+    # could use top_output: to customize the output filename format
+    top: 'repository/top.template'
+    pre_mdrun: 'repository/0_pre_mdrun.sh.template'
+    mdrun: 'repository/0_mdrun.sh.template'
 
 # anal: !include .xitconfig_anal.yaml
 
