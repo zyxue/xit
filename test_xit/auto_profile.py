@@ -13,13 +13,14 @@ import cProfile
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+import xit
+
 def profile():
     profile_file = '/tmp/time.log'
-    cProfile.run("import utils", profile_file)
+    cProfile.run("xit.main(['prep', '-p', 'mkdir'])", profile_file)
     import pstats
     p = pstats.Stats(profile_file)
     p.sort_stats('cumulative').print_stats(20)
-    # cProfile.run("xit.main(['-h'])", 'time.log')
 
 if __name__ == "__main__":
     class ProfileHandler(FileSystemEventHandler):

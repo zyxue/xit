@@ -39,21 +39,21 @@ def prepare(A, C, core_vars):
     else:
         raise ValueError("Unknown prep option: {0}".format(A.prepare))
 
-def mkdir(core_vars, A, C):
+def mkdir(core_vars, A=None, C=None):
     """
     Make directories based on ``.xitconfig``. The looping is similar to
     :func:`transform.init_hdf5`.
     """
     paths = U.gen_paths_dict(core_vars)
+    eq_dir_name = S.EQ_DIR_NAME
 
     depths = sorted(paths.keys())
     max_depth = max(depths)
     for dp in depths:
-        ps = paths[dp]
-        for p in ps:
+        for p in paths[dp]:
             mk_new_dir(p)
             if dp == max_depth:
-                eq_p = os.path.join(p, S.EQ_DIR_NAME) # eq_p: equilibration path
+                eq_p = os.path.join(p, eq_dir_name) #  eq_p: equilibration path
                 mk_new_dir(eq_p)
 
 def mk_new_dir(p):

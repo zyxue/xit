@@ -1,8 +1,8 @@
 systems:
   var1: [epz1]
-  var2: [h]
+  var2: [h, e]
   var3: [8]
-  var4: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09']
+  var4: ['00', '01', '02']
 
   dir1: '{var1}'
   dir2: '{var2}'
@@ -22,10 +22,7 @@ hdf5:
     filename: epz1.h5
 
 prep:
-  link_gro:
-    src_gro: 'repository/system_prep/{var2}/{var1}{var2}{var3}.gro'
-    # the name format of the basename of target gro
-    target_gro: '{var1}{var2}{var3}.gro'
+  sed_files:
 
   sed_top:
     top_tmpl: 'repository/top.template'

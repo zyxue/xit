@@ -88,7 +88,7 @@ def format_dict(ordered_dict):
         ret.append('          {0}: {1}'.format(k, v))
     return '\n'.join(ret)
 
-def main(cmd_args):
+def init(cmd_args):
     sys.stdout.write('INIT: parsing arguments...\n')
     A = xU.get_cmd_args(cmd_args)
 
@@ -118,8 +118,15 @@ def main(cmd_args):
 
     core_vars = gen_core_vars_r(vars_, dir_templates, id_template)
     logger.debug(pprint.pformat((core_vars)))
+    return A, C, core_vars
+    
+def main(cmd_args):
+    A, C, core_vars = init(cmd_args)
+    print vars(A)
+    print C
+    print core_vars
 
-    subcmd = sys.argv[1]        # subcommand
+    subcmd = cmd_args[0]        # subcommand
     if subcmd == 'prep':
         import prep
         prep.prepare(A, C, core_vars)
