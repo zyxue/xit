@@ -22,12 +22,13 @@ import Queue
 from threading import Thread
 from collections import OrderedDict
 from functools import update_wrapper
-from jinja2 import Template
+
 
 import settings as S
 
-import tables
-import numpy as np
+tables = None
+np = None
+jinja2 = None
 
 def decorator(d):
     "Make function d a decorator: d wraps a function fn."
@@ -82,6 +83,10 @@ def backup_file(f):
         print "BACKUP FINISHED"
 
 def sem(vals):
+    global np
+    if np is None:
+        import numpy as np
+
     mean = np.mean(vals)
     p1 = sum((val - mean) ** 2 for val in vals)
     p2 = len(vals)
@@ -89,6 +94,10 @@ def sem(vals):
     return np.sqrt(p1 / p2) / np.sqrt(p3)
 
 def sem3(ar):
+    global np
+    if np is None:
+        import numpy as np
+
     # equivalent to stats.sem(ar, axis=0) for 3D array
     # return ar.std(axis=0) / (ar.shape[0] - 1)
 
@@ -100,6 +109,10 @@ def sem3(ar):
 
 def gen_rc(n, pt_dd={}):
     """generate row and column numbers"""
+    global np
+    if np is None:
+        import numpy as np
+
     if 'ncol_nrow' in pt_dd:
         ncol, nrow = pt_dd['ncol_nrow']
         logger.info('found ncol_nrow in config file, # of cols: {0}, # of rows; {1}'.format(ncol, nrow))
@@ -249,6 +262,10 @@ def runit(cmd_logf_generator, numthread, ftest):
     q.join()
 
 def get_h5(A, C):
+    global tables
+    if tables is None:
+        import tables
+
     if A.hdf5:
         hdf5 = A.hdf5
     else:
@@ -424,7 +441,11 @@ def template(tmpl, **kwargs):
     """
     use jinja2 for templating to avoid confuson of ${var} in shell-script file
     """
-    s = Template(tmpl)
+    global jinja2
+    if jinja2 is None:
+        import jinja2
+
+    s = jinja2.Template(tmpl)
     s2 = s.render(kwargs)
     return s2
 
@@ -453,6 +474,9 @@ def prob2pmf(p, max_p, e=None):
 
     convert the probability of e2ed to potential of mean force
     """
+    global np
+    if np is None:
+        import numpy as np
 
     T = 300                                                 # Kelvin
     # R = 8.3144621                                           # J/(K*mol)
@@ -482,6 +506,10 @@ def calc_r2(values, fit_values):
     for linear regression, r^2 is equal to the sample Pearson correlation
     coefficient
     """
+    global np
+    if np is None:
+        import numpy as np
+
     ave = np.average(values)
     # sstot: total sum of squares
     sstot = sum((i - ave)**2 for i in values)
