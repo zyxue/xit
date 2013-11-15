@@ -19,7 +19,7 @@ data:
 
 hdf5:
     title: 'aggregates of 8 test_epz1'
-    filename: test_epz1.h5
+    filename: lele_epz1.h5
 
 prep:
   sed_templates:
