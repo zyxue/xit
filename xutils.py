@@ -50,13 +50,21 @@ def get_cmd_args(args_to_parse=None):
     subparsers = parser.add_subparsers(title='subcommands')
 
     prep_parser = subparsers.add_parser('prep', help='used during simulation preparation')
-    mgrp = prep_parser.add_mutually_exclusive_group()
-    mgrp.add_argument('-p', '--prepare', choices=[
-            'mkdir', 'sed_top', 'sed_itp', 'sed_0_jobsub_sh', 'sed_0_mdrun_sh',
-            'qsub_0_jobsub_sh', 'exec_0_jobsub_sh', 'qsub_0_mdrun_sh'])
-    # exec_0_jobsub_sh is usually used when the equilibration doesn't take a long time
 
-    prep_parser.add_argument('--overwrite', action='store_true', help='overwrite previous file when do sed')
+    mgrp = prep_parser.add_mutually_exclusive_group()
+    mgrp.add_argument('--mkdir', action='store_true', help='make directories based on .xitconfig.yaml')
+    mgrp.add_argument('--sed', dest='sed_files_key', default=None, nargs='?',
+                      help=('the key corresponding to the files to be sed, e.g. top, premdrun, mdrun, '
+                            'or you could specify "ALL" to let xit '
+                            'sed every files found in sed_templates in the .xitconfig.yaml'))
+    mgrp.add_argument('--exec', dest='exec_files_key', default=None,
+                      help=('the key corresponding to the files to be executed'
+                            'e.g. premdrun, mdrun (especially when they will finish shortly, '
+                            "and you don't want to submit them to the job queueing system"))
+    mgrp.add_argument('--qsub', dest='qsub_files_key', 
+                      help='the key corresponding to the files to be qsub-ed to the queueing system')
+
+    prep_parser.add_argument('--overwrite', action='store_true', help='overwrite previous files when do --sed')
 
     anal_parser = subparsers.add_parser(
         'anal', help='do different sorts of analysis')

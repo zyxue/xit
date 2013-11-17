@@ -89,7 +89,6 @@ def format_dict(ordered_dict):
     return '\n'.join(ret)
 
 def init(cmd_args):
-    sys.stdout.write('INIT: parsing arguments...\n')
     A = xU.get_cmd_args(cmd_args)
 
     logging.basicConfig(
@@ -122,9 +121,6 @@ def init(cmd_args):
     
 def main(cmd_args):
     A, C, core_vars = init(cmd_args)
-    print vars(A)
-    print C
-    print core_vars
 
     subcmd = cmd_args[0]        # subcommand
     if subcmd == 'prep':

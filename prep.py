@@ -26,20 +26,33 @@ def prepare(A, C, core_vars):
     Based on the input, it determines which step of system preparation to
     invoke.
     """
-    if A.prepare == 'mkdir':
-        mkdir(core_vars, A, C)
-    elif A.prepare in ['sed_top', 'sed_itp', 'sed_0_jobsub_sh']:
-        sed_file(A.prepare, core_vars, A, C)
-    elif A.prepare in ['qsub_0_jobsub_sh', 'exec_0_jobsub_sh', 'qsub_0_mdrun_sh']:
-        exec_cmd(A.prepare, core_vars, A, C)
-    elif A.prepare == 'sed_0_mdrun_sh':
-        sed_0_mdrun_sh(core_vars, A, C)
-    elif A.prepare == 'targzip':
-        targzip(core_vars, A, C)
-    else:
-        raise ValueError("Unknown prep option: {0}".format(A.prepare))
+    config = C['prep']
+    if A.mkdir == 'mkdir':
+        mkdir(core_vars)
 
-def mkdir(core_vars, A=None, C=None):
+    if A.sed_files_key is not None:
+        sed_files(core_vars, config, A.sed_files_key, A.overwrite)
+
+    if A.exec_files_key is not None:
+        pass
+
+    if A.qsub_files_key is not None:
+        pass
+
+    # A.prepare == 'sed':
+    #     sed_files(core_vars, config, A.overwrite)
+    # elif A.prepare == 'qsub':
+    #     pass
+    # elif A.prepare == 'exec':
+    #     pass
+    # elif A.prepare in ['qsub_0_jobsub_sh', 'exec_0_jobsub_sh', 'qsub_0_mdrun_sh']:
+    #     exec_cmd(A.prepare, core_vars, A, C)
+    # elif A.prepare == 'targzip':
+    #     targzip(core_vars, A, C)
+    # else:
+    #     raise ValueError("Unknown prep option: {0}".format(A.prepare))
+
+def mkdir(core_vars):
     """
     Make directories based on ``.xitconfig``. The looping is similar to
     :func:`transform.init_hdf5`.
@@ -63,50 +76,48 @@ def mk_new_dir(p):
     else:
         logger.info('{0} ALREADY EXISTED'.format(p))
 
-def sed_file(key, core_vars, A, C):
-    """
-    Sed the target file (e.g. ``.top``, ``.itp``, ``0_jobsub.sh``,
-    ``0_mdrun.sh`` ) to the directory of each replica.
+def sed_files(core_vars, config, sed_files_key, f_overwrite):
+    eq_dir_name = S.EQ_DIR_NAME
+    sed_templates_dd = config['sed_templates']
+    if sed_files_key != 'ALL':
+        sed_templates_dd = {sed_files_key: sed_templates_dd[sed_files_key]}    
 
-    :param key: the type of prep as specified after ``xit prep -p``
-    :type key: str
-    """
     for cv in core_vars:
         dpp = U.get_dpp(cv)     # dpp: deepest path
-        eq_p = os.path.join(dpp, S.EQ_DIR_NAME)
-        must_exist(eq_p)
+        eq_p = os.path.join(dpp, eq_dir_name)
 
-        template, output = gen_template_output(key, cv, eq_p, C)
-        if tar_ex_ow(output, A.overwrite):
-            U.template_file(template, output, **cv)
+        for key, tmpl in sed_templates_dd.items():
+            template = tmpl.format(**cv)
+            if key == 'mdrun':
+                templated_output = get_templated_output(key, cv, dpp, sed_templates_dd)
+            else:
+                templated_output = get_templated_output(key, cv, eq_p, sed_templates_dd)
+            sed_file(template, templated_output, cv, f_overwrite)
 
-def gen_template_output(key, cv, path, C):
+def get_templated_output(key, cv, path, sed_templates):
     """
-    Called by :func:`sed_file`.
-
-    :param key: the type of prep as specified after ``xit prep -p``
-    :type key: str
-    :param cv: the core variable
-    :type cv: dict 
-    :param path: the path of the replica
-    :type path: str
-
-    :return: ``template`` file and seded ``output`` file
+    :param sed_templates: templates
+    :type sed_templates: dict
     """
+    dd = sed_templates
+    if key == 'top': 
+        name = dd.get('top_output', '{id_}.top').format(**cv)
+    elif key == 'pre_mdrun': 
+        name = dd.get('pre_mdrun_output', '0_pre_mdrun.sh').format(**cv)
+    elif key == 'mdrun': 
+        name = dd.get('mdrun_output', '0_mdrun_sh').format(**cv)
+    else:
+        name = dd['{0}_output'] # must exists, no default
+    return os.path.join(path, name)
 
-    if key == 'sed_top':
-        dd = C['prep']['sed_top']
-        template = dd['top_tmpl'].format(**cv)
-        output = os.path.join(path, dd.get('output',  '{id_}.top').format(**cv))
-    elif key == 'sed_itp':
-        dd = C['prep']['sed_itp']
-        template = dd['itp_tmpl'].format(**cv)
-        output = os.path.join(path, dd.get('output',  '{id_}.itp').format(**cv))
-    elif key == 'sed_0_jobsub_sh':
-        dd = C['prep']['sed_0_jobsub_sh']
-        template = dd['jobsub_tmpl'].format(**cv)
-        output = os.path.join(path, '0_jobsub.sh')
-    return template, output
+def sed_file(input_, output, cv, f_overwrite):
+    if os.path.exists(output):
+        if f_overwrite:
+            U.template_file(input_, output, **cv)
+        else:
+            logger.info('{0} ALREADY EXISTS. use --overwrite to overwrite previous one'.format(output))
+    else:
+        U.template_file(input_, output, **cv)
 
 def exec_cmd(key, core_vars, A, C):
     """
