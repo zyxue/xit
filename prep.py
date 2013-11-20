@@ -27,11 +27,18 @@ def prepare(A, C, core_vars):
     invoke.
     """
     config = C['prep']
-    if A.mkdir == 'mkdir':
+    if A.mkdir:
         mkdir(core_vars)
 
-    if A.sed_files_key is not None:
-        sed_files(core_vars, config, A.sed_files_key, A.overwrite)
+    if A.sed_files_keys is not None:
+        keys = A.sed_files_keys
+        dd = config['sed_files']
+        if 'all' in keys:       # ignore keys[1:]
+            for item in dd.items():
+                sed_files(core_vars, config, item, A.overwrite)
+        else:
+            for key in keys:
+                sed_files(core_vars, config, (key, dd[key]), A.overwrite)
 
     if A.exec_files_key is not None:
         pass
@@ -76,46 +83,33 @@ def mk_new_dir(p):
     else:
         logger.info('{0} ALREADY EXISTED'.format(p))
 
-def sed_files(core_vars, config, sed_files_key, f_overwrite):
+def sed_files(core_vars, config, item, f_overwrite):
+    """
+    @param item: tuple of key and corresponding template
+    """
     eq_dir_name = S.EQ_DIR_NAME
-    sed_templates_dd = config['sed_templates']
-    if sed_files_key != 'ALL':
-        sed_templates_dd = {sed_files_key: sed_templates_dd[sed_files_key]}    
+    key, val = item
 
+    tmpl = val['src']
+    output_name = val['name']
     for cv in core_vars:
         dpp = U.get_dpp(cv)     # dpp: deepest path
-        eq_p = os.path.join(dpp, eq_dir_name)
+        if val.get('b_pre_mdrun', True):
+            p = os.path.join(dpp, eq_dir_name) # inside eq_dir_name
+        else:
+            p = dpp             # outside eq_dir_name
 
-        for key, tmpl in sed_templates_dd.items():
-            template = tmpl.format(**cv)
-            if key == 'mdrun':
-                templated_output = get_templated_output(key, cv, dpp, sed_templates_dd)
-            else:
-                templated_output = get_templated_output(key, cv, eq_p, sed_templates_dd)
-            sed_file(template, templated_output, cv, f_overwrite)
-
-def get_templated_output(key, cv, path, sed_templates):
-    """
-    :param sed_templates: templates
-    :type sed_templates: dict
-    """
-    dd = sed_templates
-    if key == 'top': 
-        name = dd.get('top_output', '{id_}.top').format(**cv)
-    elif key == 'pre_mdrun': 
-        name = dd.get('pre_mdrun_output', '0_pre_mdrun.sh').format(**cv)
-    elif key == 'mdrun': 
-        name = dd.get('mdrun_output', '0_mdrun_sh').format(**cv)
-    else:
-        name = dd['{0}_output'] # must exists, no default
-    return os.path.join(path, name)
+        template = tmpl.format(**cv)
+        output = os.path.join(p, output_name.format(**cv))
+        sed_file(template, output, cv, f_overwrite)
 
 def sed_file(input_, output, cv, f_overwrite):
     if os.path.exists(output):
         if f_overwrite:
             U.template_file(input_, output, **cv)
         else:
-            logger.info('{0} ALREADY EXISTS. use --overwrite to overwrite previous one'.format(output))
+            logger.info('{0} ALREADY EXISTS. use '
+                        '--overwrite to overwrite previous one'.format(output))
     else:
         U.template_file(input_, output, **cv)
 

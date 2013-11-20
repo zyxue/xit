@@ -53,7 +53,7 @@ def get_cmd_args(args_to_parse=None):
 
     mgrp = prep_parser.add_mutually_exclusive_group()
     mgrp.add_argument('--mkdir', action='store_true', help='make directories based on .xitconfig.yaml')
-    mgrp.add_argument('--sed', dest='sed_files_key', default=None, nargs='?',
+    mgrp.add_argument('--sed', dest='sed_files_keys', default=None, nargs='+',
                       help=('the key corresponding to the files to be sed, e.g. top, premdrun, mdrun, '
                             'or you could specify "ALL" to let xit '
                             'sed every files found in sed_templates in the .xitconfig.yaml'))
