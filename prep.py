@@ -30,34 +30,32 @@ def prepare(A, C, core_vars):
     if A.mkdir:
         mkdir(core_vars)
 
-    if A.sed_files_keys is not None:
+    elif A.sed_files_keys is not None:
+        # A.sed_files_keys should be a list, different from the cases of exec
+        # and qsub
         keys = A.sed_files_keys
-        dd = config['sed_files']
+        dd = config['files']
         if 'all' in keys:       # ignore keys[1:]
             for item in dd.items():
-                sed_files(core_vars, config, item, A.overwrite)
+                sed_files(core_vars, item, A.overwrite)
         else:
             for key in keys:
-                sed_files(core_vars, config, (key, dd[key]), A.overwrite)
+                sed_files(core_vars, (key, dd[key]), A.overwrite)
 
-    if A.exec_files_key is not None:
-        pass
+    elif A.exec_files_key is not None:
+        key = A.exec_files_key
+        item = (key, config['files'][key])
+        exec_cmds(core_vars, item)
 
-    if A.qsub_files_key is not None:
-        pass
+    elif A.qsub_files_key is not None:
+        key = A.exec_files_key
+        item = (key, config['files'][key])
+        exec_cmds(core_vars, item, f_qsub=True)
 
-    # A.prepare == 'sed':
-    #     sed_files(core_vars, config, A.overwrite)
-    # elif A.prepare == 'qsub':
-    #     pass
-    # elif A.prepare == 'exec':
-    #     pass
-    # elif A.prepare in ['qsub_0_jobsub_sh', 'exec_0_jobsub_sh', 'qsub_0_mdrun_sh']:
-    #     exec_cmd(A.prepare, core_vars, A, C)
     # elif A.prepare == 'targzip':
     #     targzip(core_vars, A, C)
-    # else:
-    #     raise ValueError("Unknown prep option: {0}".format(A.prepare))
+    else:
+        logging.info('Nothing to be done')
 
 def mkdir(core_vars):
     """
@@ -83,9 +81,9 @@ def mk_new_dir(p):
     else:
         logger.info('{0} ALREADY EXISTED'.format(p))
 
-def sed_files(core_vars, config, item, f_overwrite):
+def sed_files(core_vars, item, f_overwrite):
     """
-    @param item: tuple of key and corresponding template
+    @param item: tuple of key and corresponding info
     """
     eq_dir_name = S.EQ_DIR_NAME
     key, val = item
@@ -93,12 +91,7 @@ def sed_files(core_vars, config, item, f_overwrite):
     tmpl = val['src']
     output_name = val['name']
     for cv in core_vars:
-        dpp = U.get_dpp(cv)     # dpp: deepest path
-        if val.get('b_pre_mdrun', True):
-            p = os.path.join(dpp, eq_dir_name) # inside eq_dir_name
-        else:
-            p = dpp             # outside eq_dir_name
-
+        p = get_path(cv, eq_dir_name, val.get('b_pre_mdrun', True))
         template = tmpl.format(**cv)
         output = os.path.join(p, output_name.format(**cv))
         sed_file(template, output, cv, f_overwrite)
@@ -113,55 +106,46 @@ def sed_file(input_, output, cv, f_overwrite):
     else:
         U.template_file(input_, output, **cv)
 
-def exec_cmd(key, core_vars, A, C):
+def exec_cmds(core_vars, item, f_qsub=False):
     """
     Generate the command by calling :func:`gen_cmd` and feeding it into
     :func:`utils.runit` for execution.
 
-    :param key: the type of prep as specified after ``xit prep -p``
-    :type key: str
+    @param f_qsub: if ``f_qsub`` is True, then invoke the qsub the script to
+    the queueing system instead of executing it.
     """
-    x = gen_cmd(key, core_vars, A, C)
+    x = gen_cmds(core_vars, item, f_qsub)
     U.runit(x, 4, False)       # numthreads = 4 temporarily, False mean not testing
 
-def gen_cmd(key, core_vars, A, C):
+def gen_cmds(core_vars, item, f_qsub):
     """
     Called by :func:`exec_cmd`, generate the corresponding command.
 
+    @param item: tuple of key and corresponding template
+
     :yield: the command
     """
+    eq_dir_name = S.EQ_DIR_NAME
+    key, val = item
+
+    output_name = val['name']
     for cv in core_vars:
-        eq_p = dpp = U.get_dpp(cv)
-        if key in ['qsub_0_jobsub_sh', 'exec_0_jobsub_sh']:
-            eq_p = os.path.join(dpp, S.EQ_DIR_NAME)
-        must_exist(eq_p)
-        cmd = construct_cmd(key, eq_p)
+        p = get_path(cv, eq_dir_name, val.get('b_pre_mdrun', True))
+        output = output_name.format(**cv)
+        if f_qsub:
+            cmd = 'cd {0}; qsub {1}; cd -'.format(p, output)
+        else:
+            cmd = 'cd {0}; bash {1}; cd -'.format(p, output)
         yield (cmd, None)       # none means nolog
 
-def construct_cmd(key, path):
-    """
-    Called by :func:`gen_cmd`, construct the command based on the ``key`` and path.
+def get_path(cv, eq_dir_name, b_pre_mdrun=False):
+    dpp = U.get_dpp(cv)        
+    if b_pre_mdrun:
+        p = os.path.join(dpp, eq_dir_name) # inside eq_dir_name
+    else:
+        p = dpp                 # outside eq_dir_name
+    return p
 
-    :return: the command.
-    """
-    if key == 'qsub_0_jobsub_sh':
-        return 'cd {0}; qsub 0_jobsub.sh; cd -'.format(path)
-    elif key == 'exec_0_jobsub_sh':
-        return 'cd {0}; bash 0_jobsub.sh; cd -'.format(path)
-    elif key == 'qsub_0_mdrun_sh':
-        return 'cd {0}; qsub 0_mdrun.sh; cd -'.format(path)
-
-def sed_0_mdrun_sh(core_vars, A, C):
-    """
-    Sed ``0_mdrun.sh``, different from other sed_files in terms of the file locations
-    """
-    for cv in core_vars:
-        dpp = U.get_dpp(cv)
-        if path_exists(dpp):
-            mdrun_tmpl = C['prep']['sed_0_mdrun_sh']['mdrun_tmpl'].format(**cv)
-            output_mdrun = os.path.join(dpp, '0_mdrun.sh')
-            if tar_ex_ow(output_mdrun, A.overwrite):
-                U.template_file(mdrun_tmpl, output_mdrun, **cv)
 
 def targzip(core_vars, A, C):
     """
@@ -182,19 +166,3 @@ def tar_ex_ow(target_file, f_overwrite):
         return True
     else:
         logger.info('{0} ALREADY EXISTS. use --overwrite to overwrite previous one'.format(target_file))        
-
-def path_exists(eq_p):
-    """
-    check if the path eq_p exists, if it does, return :keyword:`True`, else log info.
-    """
-    if os.path.exists(eq_p):
-        return True
-    else:
-        logger.info("{0} doesn't exist, have you done -p mkdir, yet?".format(eq_p))
-
-def must_exist(path_or_file):
-    """
-    The path or file must exist, otherwise raise :keyword:`IOERROR`.
-    """
-    if not os.path.exists(path_or_file):
-        raise IOError("fatal: {0} doesn't exist!".format(path_or_file))

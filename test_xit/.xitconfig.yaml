@@ -22,7 +22,7 @@ hdf5:
     filename: lele_epz1.h5
 
 prep:
-  sed_files:
+  files:
     # could use top_output: to customize the output filename format
     top: 
       src: 'repository/top.template'
