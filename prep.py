@@ -48,7 +48,7 @@ def prepare(A, C, core_vars):
         exec_cmds(core_vars, item)
 
     elif A.qsub_files_key is not None:
-        key = A.exec_files_key
+        key = A.qsub_files_key
         item = (key, config['files'][key])
         exec_cmds(core_vars, item, f_qsub=True)
 
