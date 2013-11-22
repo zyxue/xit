@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 import subprocess
 import Queue
 from threading import Thread
-from collections import OrderedDict
 from functools import update_wrapper
 
 import settings as S
@@ -144,17 +143,6 @@ def split(l, group_size):
             k += 1                             # asure to include the remainder
         return [l[(i * n): ((i+1) * n)] for i in xrange(k)]
 
-# def float_params(d, *key_list):
-#     """
-#     this is not very great way of trying to do what json does
-
-#     key_list contains the names of properties as specified in the xit
-#     configuration file (e.g. xitconfig) that need to be converted to float
-#     """
-#     # overwrite old vals with floated ones
-#     d.update({k:float(d[k]) for k in key_list if k in d})
-#     return d
-
 def gen_id_paths_r(vars_, dir_templates, id_template='', result=[], **kw):
     """_r means recursion"""
     if not vars_:
@@ -172,18 +160,6 @@ def gen_id_paths_r(vars_, dir_templates, id_template='', result=[], **kw):
             vars_copy = {i:vars_[i] for i in vars_}
             gen_id_paths_r(vars_copy, dir_templates, id_template, **kw_copy)
     return result
-
-# def gen_paths(dirs, dirname='', result=[]):
-#     if not dirs:
-#         result.append(dirname)
-#     else:
-#         d = dirs.pop(0)
-#         for i in d:
-#             dn = os.path.join(dirname, i)
-#             # a copy for each branch
-#             dirs_copy = [x for x in dirs]
-#             gen_paths(dirs_copy, dirname=dn)
-#     return result
 
 def gen_io_files(target_dir, pf):
     """
