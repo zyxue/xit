@@ -13,6 +13,15 @@ def check_inputdir(**kw):
     s = 'echo "{0!s} exists"'.format(d)
     return s
 
+def gmxcheck_cpt(**kw):
+    # tr -d [:cntrl:] : remove control characters
+    # sed -e : remove color characters, the re is not the same as that in
+    # python,
+    # http://www.gnu.org/software/sed/manual/html_node/Regular-Expressions.html
+    # for details
+    sed_re = 's/\[\([0-9]\{2\};[0-9]\{2\}\)\?m\[K//g'
+    return "t=$(gmxcheck -f {cptf} 2>&1 | grep 'Last frame' | tr -d [:cntrl:] | sed -e '{sed_re}'); echo {cptf}: $t".format(sed_re=sed_re, **kw)
+
 def trjorder(**kw):
     dd = utils.get_anal_dd(kw['C'], 'trjorder')
     fn = '_{0}'.format(os.path.basename(kw['orderxtcf']))

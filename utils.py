@@ -23,7 +23,6 @@ from threading import Thread
 from collections import OrderedDict
 from functools import update_wrapper
 
-
 import settings as S
 
 tables = None
@@ -211,6 +210,10 @@ def gen_io_files(target_dir, pf):
             target_dir, '{pf}_order.gro'.format(pf=pf)),
         grof = os.path.join(
             target_dir, '{pf}_md.gro'.format(pf=pf)),
+        cptf = os.path.join(
+            target_dir, '{pf}_md.cpt'.format(pf=pf)),
+        prev_cptf = os.path.join(
+            target_dir, '{pf}_md_prev.cpt'.format(pf=pf)),
         proxtcf = os.path.join(
             target_dir, '{pf}_pro.xtc'.format(pf=pf)),
         progrof = os.path.join(
@@ -224,7 +227,7 @@ def gen_io_files(target_dir, pf):
     return io_files
 
 
-def runit(cmd_logf_generator, numthread, ftest):
+def runit(cmd_logf_generator, numthread, ftest, verbose=False):
     """
     Putting each analyzing codes in a queue to use the 8 cores simutaneously.
     """
@@ -234,7 +237,8 @@ def runit(cmd_logf_generator, numthread, ftest):
             if ftest:
                 print cmd
             else:
-                logging.info('working on {0:s}'.format(cmd))
+                if verbose:
+                    logging.info('working on {0:s}'.format(cmd))
                 if logf is None:
                     p = subprocess.call(cmd, shell=True)
                 else:

@@ -12,7 +12,6 @@ from collections import OrderedDict
 import yaml
 import yaml_utils
 yaml.add_constructor('!include', yaml_utils.include)
-# from scipy import stats
 
 import xutils as xU
 

@@ -2,18 +2,18 @@ import os
 import logging
 logger = logging.getLogger(__name__)
 
-import utils
+import utils as U
 import analysis_methods
 
 
 def analyze(A, C, core_vars):
     x = gen_cmds(A, C, core_vars)
-    utils.runit(x, A.numthreads, A.test)
+    U.runit(x, A.numthreads, A.test, A.v)
 
 def gen_cmds(A, C, core_vars):
     for cv in core_vars:
-        dpp = utils.get_dpp(cv)                             # dpp: deepest path
-        io_files = utils.gen_io_files(dpp, cv['id_'])
+        dpp = U.get_dpp(cv)                             # dpp: deepest path
+        io_files = U.gen_io_files(dpp, cv['id_'])
         root = os.path.dirname(os.path.abspath(A.config))
 
         kw = {}
