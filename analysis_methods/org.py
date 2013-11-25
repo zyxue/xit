@@ -22,18 +22,34 @@ def gmxcheck_cpt(**kw):
     sed_re = 's/\[\([0-9]\{2\};[0-9]\{2\}\)\?m\[K//g'
     return "t=$(gmxcheck -f {cptf} 2>&1 | grep 'Last frame' | tr -d [:cntrl:] | sed -e '{sed_re}'); echo {cptf}: $t".format(sed_re=sed_re, **kw)
 
+def trjconv_cluster_center(**kw):
+    p1 = 'printf "Protein\nSystem\n" | trjconv -f {xtcf} -s {tprf} -pbc cluster -o {clusterxtcf}'.format(**kw)
+    p2 = 'printf "Protein\nSystem\n" | trjconv -f {clusterxtcf} -s {tprf} -pbc mol -center -ur tric -o {centerxtcf}; rm {clusterxtcf}'.format(**kw)
+    return '\n'.join([p1, p2])
+
 def trjorder(**kw):
     dd = utils.get_anal_dd(kw['C'], 'trjorder')
     fn = '_{0}'.format(os.path.basename(kw['orderxtcf']))
     kw['tmporderf'] = os.path.join(kw['inputdir'], fn)
     na_key = dd['nak_fmt'].format(**kw)
     na = dd['na'][na_key]
-    return """
-printf "Protein\nSystem\n"     | trjconv  -f {xtcf}        -s {tprf} -center   -pbc mol -ur tric -o {centerxtcf}
-printf "Protein\nAll_Solvent\n"| trjorder -f {centerxtcf}  -s {tprf} -n {ndxf} -na {na} -o {tmporderf} ;        rm {centerxtcf}
-printf "Ordered_Sys\n"         | trjconv  -f {tmporderf}   -s {tprf} -n {ndxf} -o {orderxtcf};                  rm {tmporderf}
-printf "Ordered_Sys\n"         | trjconv  -f {orderxtcf}   -s {tprf} -n {ndxf} -dump {b} -o {ordergrof}
+
+    if os.path.exists(kw['centerxtcf']): # possibly prodcued by trjconv_cluster_center
+        p1 = """
+printf "Protein\nAll_Solvent\n"| trjorder -f {centerxtcf}  -s {tprf} -n {ndxf} -na {na} -o {tmporderf} -b {b}  ;     # rm {centerxtcf}
 """.format(na=na, **kw)
+    else:
+        p1 = """
+printf "Protein\nSystem\n"     | trjconv  -f {xtcf}        -s {tprf} -center   -pbc mol -ur tric -o {centerxtcf} -b {b} 
+printf "Protein\nAll_Solvent\n"| trjorder -f {centerxtcf}  -s {tprf} -n {ndxf} -na {na} -o {tmporderf} ;      rm {centerxtcf}
+""".format(na=na, **kw)
+
+    p2 = """
+printf "Ordered_Sys\n"         | trjconv  -f {tmporderf}   -s {tprf} -n {ndxf} -o {orderxtcf};                rm {tmporderf}
+printf "Ordered_Sys\n"         | trjconv  -f {orderxtcf}   -s {tprf} -n {ndxf} -dump {b} -o {ordergrof}
+""".format(**kw)
+
+    return '\n'.join([p1, p2])
 
 def g_select(**kw):
     dd = utils.get_anal_dd(kw['C'], 'g_select')
@@ -42,7 +58,7 @@ def g_select(**kw):
                             kw['C']['data']['repository'],
                             repo_ndx_fn)
     gssk = dd['gssk_fmt'].format(**kw)
-    gss  = dd['gss'].get('const') + dd['gss'][gssk]                   # gss: g_select selction
+    gss  = dd['gss'].get('const', '') + dd['gss'][gssk]                   # gss: g_select selction
     if os.path.exists(kw['ordergrof']):
         thegrof = kw['ordergrof']
         thetprf = kw['ordergrof']
