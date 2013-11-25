@@ -43,14 +43,19 @@ def prepare(A, C, core_vars):
                 sed_files(core_vars, (key, dd[key]), A.overwrite)
 
     elif A.exec_files_key is not None:
-        key = A.exec_files_key
-        item = (key, config['files'][key])
+        k = A.exec_files_key
+        item = (k, config['files'][k])
         exec_cmds(core_vars, item)
 
     elif A.qsub_files_key is not None:
-        key = A.qsub_files_key
-        item = (key, config['files'][key])
+        k = A.qsub_files_key
+        item = (k, config['files'][k])
         exec_cmds(core_vars, item, f_qsub=True)
+
+    elif A.reqsub_files_key is not None:
+        k = A.reqsub_files_key
+        item = (k, config['files'][k])
+        exec_cmds(core_vars, item, f_reqsub=True, verbose=A.v)
 
     # elif A.prepare == 'targzip':
     #     targzip(core_vars, A, C)
@@ -106,18 +111,21 @@ def sed_file(input_, output, cv, f_overwrite):
     else:
         U.template_file(input_, output, **cv)
 
-def exec_cmds(core_vars, item, f_qsub=False):
+def exec_cmds(core_vars, item, f_qsub=False, f_reqsub=False, numthreads=4, ftest=False, verbose=False):
     """
     Generate the command by calling :func:`gen_cmd` and feeding it into
     :func:`utils.runit` for execution.
 
     @param f_qsub: if ``f_qsub`` is True, then invoke the qsub the script to
     the queueing system instead of executing it.
-    """
-    x = gen_cmds(core_vars, item, f_qsub)
-    U.runit(x, 4, False)       # numthreads = 4 temporarily, False mean not testing
 
-def gen_cmds(core_vars, item, f_qsub):
+    @param numthreads = 4 by default, since prep step is usually fast, so 4
+    should be enough most of the time.
+    """
+    x = gen_cmds(core_vars, item, f_qsub, f_reqsub)
+    U.runit(x, numthreads, ftest, verbose)
+
+def gen_cmds(core_vars, item, f_qsub, f_reqsub):
     """
     Called by :func:`exec_cmd`, generate the corresponding command.
 
@@ -134,6 +142,8 @@ def gen_cmds(core_vars, item, f_qsub):
         output = output_name.format(**cv)
         if f_qsub:
             cmd = 'cd {0}; qsub {1}; cd -'.format(p, output)
+        elif f_reqsub:          # this is specific to my 0_mdrun.sh
+            cmd = 'cd {0}; qsub -v COUNTER=5 {1}; cd -'.format(p, output)
         else:
             cmd = 'cd {0}; bash {1}; cd -'.format(p, output)
         yield (cmd, None)       # none means nolog
@@ -145,7 +155,6 @@ def get_path(cv, eq_dir_name, b_pre_mdrun=False):
     else:
         p = dpp                 # outside eq_dir_name
     return p
-
 
 def targzip(core_vars, A, C):
     """

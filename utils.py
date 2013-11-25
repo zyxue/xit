@@ -178,6 +178,8 @@ def gen_io_files(target_dir, pf):
 
         xtcf = os.path.join(
             target_dir, '{pf}_md.xtc'.format(pf=pf)),
+        clusterxtcf = os.path.join( # for systems with multiple proteins
+            target_dir, '{pf}_cluster.xtc'.format(pf=pf)),
         centerxtcf = os.path.join(
             target_dir, '{pf}_center.xtc'.format(pf=pf)),
         orderxtcf = os.path.join(
@@ -203,7 +205,7 @@ def gen_io_files(target_dir, pf):
     return io_files
 
 
-def runit(cmd_logf_generator, numthread, ftest, verbose=False):
+def runit(cmd_logf_generator, numthreads, ftest, verbose=False):
     """
     Putting each analyzing codes in a queue to use the 8 cores simutaneously.
     """
@@ -231,7 +233,7 @@ def runit(cmd_logf_generator, numthread, ftest, verbose=False):
 
     q = Queue.Queue()
 
-    for i in range(numthread):
+    for i in range(numthreads):
         t = Thread(target=worker)
         t.daemon = True
         t.start()

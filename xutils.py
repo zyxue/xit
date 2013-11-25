@@ -64,6 +64,8 @@ def get_cmd_args(args_to_parse=None):
     mgrp.add_argument('--qsub', dest='qsub_files_key', 
                       help='the key corresponding to the files to be qsub-ed to the queueing system')
 
+    mgrp.add_argument('--reqsub', dest='reqsub_files_key', help='reqsub jobs after crash')
+
     prep_parser.add_argument('--overwrite', action='store_true', help='overwrite previous files when do --sed')
 
     anal_parser = subparsers.add_parser(
