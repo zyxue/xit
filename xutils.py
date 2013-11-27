@@ -94,7 +94,8 @@ def get_cmd_args(args_to_parse=None):
     plot_parser = subparsers.add_parser(
         'plot', help='postprocess the results from analysis and illustrate it via plotting')
 
-    plot_parser.add_argument('--plot_type', choices='LELE', help='NEED A NEW STRATEGY TO LIST THIS')
+    # plot_parser.add_argument('--plot_type', choices='LELE', help='NEED A NEW STRATEGY TO LIST THIS')
+    plot_parser.add_argument('--plot_type', help='NEED A NEW STRATEGY TO LIST THIS')
     # plot_parser.add_argument('--plot_type', choices=PLOT_TYPES.keys(), help='e.g {0}'.format(PLOT_TYPES.keys()))
 
     # plot_parser.add_argument('--scale', action='store_true', help='scale to 1, when map plotting is not obvious')

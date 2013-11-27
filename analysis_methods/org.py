@@ -59,17 +59,18 @@ def g_select(**kw):
                             repo_ndx_fn)
     gssk = dd['gssk_fmt'].format(**kw)
     gss  = dd['gss'].get('const', '') + dd['gss'][gssk]                   # gss: g_select selction
-    if os.path.exists(kw['ordergrof']):
-        thegrof = kw['ordergrof']
-        thetprf = kw['ordergrof']
-    else:
-        if kw['use_pro']:
-            thegrof = kw['progrof']
-            thetprf = kw['progrof']
-        else:
-            thegrof = kw['grof']
-            thetprf = kw['grof']
-        
+    # if os.path.exists(kw['ordergrof']):
+    #     thegrof = kw['ordergrof']
+    #     thetprf = kw['ordergrof']
+    # else:
+    #     if kw['use_pro']:
+    #         thegrof = kw['progrof']
+    #         thetprf = kw['progrof']
+    #     else:
+    #         thegrof = kw['grof']
+    #         thetprf = kw['grof']
+    thegrof = kw['grof']
+    thetprf = kw['grof']
     return """g_select \
 -f {thegrof} \
 -s {thetprf} \

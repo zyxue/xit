@@ -1,3 +1,48 @@
+def myg_mindist_diff_chain_LYS_LYS(**kw):
+    return "printf 'LYS\nLYS\n' | myg_mindist_diff_chain \
+-f {orderxtcf} \
+-s {tprf} \
+-n {ndxf} \
+-b {b} \
+-d 0.68 \
+-on {anal_dir}/{id_}_diff_chain_LYS_LYS.xvg \
+-od {anal_dir}/{id_}_mindist.xvg \
+-dt 1000".format(**kw)
+
+def g_mindist_XL_W(**kw):
+    return "printf 'XL\nOrdered_Solvent' | g_mindist \
+-f {orderxtcf} \
+-s {tprf} \
+-n {ndxf} \
+-b {b} \
+-d 0.68 \
+-on {anal_dir}/{id_}_XL_W.xvg \
+-od {anal_dir}/{id_}_mindist.xvg \
+-dt 1000".format(**kw)
+
+def g_mindist_HP_W(**kw):
+    return "printf 'HP\nOrdered_Solvent' | g_mindist \
+-f {orderxtcf} \
+-s {tprf} \
+-n {ndxf} \
+-b {b} \
+-d 0.68 \
+-on {anal_dir}/{id_}_HP_W.xvg \
+-od {anal_dir}/{id_}_mindist.xvg \
+-dt 1000".format(**kw)
+
+def g_mindist_LYS_W(**kw):
+    return "printf 'LYS\nOrdered_Solvent' | g_mindist \
+-f {orderxtcf} \
+-s {tprf} \
+-n {ndxf} \
+-b {b} \
+-d 0.68 \
+-on {anal_dir}/{id_}_LYS_W.xvg \
+-od {anal_dir}/{id_}_mindist.xvg \
+-dt 1000".format(**kw)
+
+
 def unvn(**kw):
     # TESTED, in the "uv" case, myg_mindist_excl1 and g_mindist produce the same result
     return "printf 'UN\nVN\n' | myg_mindist_excl1 \

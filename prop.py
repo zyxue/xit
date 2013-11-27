@@ -186,6 +186,10 @@ class pot_ener(tables.IsDescription):
     time = tables.Float32Col(pos=0)
     pot_ener = tables.Float32Col(pos=1)
 
+class g_mindist_HP_W(tables.IsDescription):
+    time = tables.Float32Col(pos=0)
+    n = tables.UInt32Col(pos=1)
+
 SCHEMA_DICT = {
     'e2ed'          : e2ed,
     'e2ed_wl'       : e2ed,
@@ -257,6 +261,8 @@ SCHEMA_DICT = {
 
     'pot_ener_em': pot_ener,
 
+    'g_mindist_HP_W': g_mindist_HP_W,
+
     }
 
 INTERESTED_FIELDS = {
@@ -297,6 +303,7 @@ INTERESTED_FIELDS = {
     'rdf_c3vp': 'rdf',
 
     'pot_ener_em': 'pot_ener',
+    'g_mindist_HP_W': 'n',
 
     }
 
