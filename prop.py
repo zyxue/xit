@@ -264,6 +264,7 @@ SCHEMA_DICT = {
     'g_mindist_HP_W': g_mindist,
     'g_mindist_XL_W': g_mindist,
     'g_mindist_LYS_W': g_mindist,
+    'myg_mindist_diff_chain_LYS_LYS': g_mindist,
 
     }
 
@@ -309,7 +310,7 @@ INTERESTED_FIELDS = {
     'g_mindist_HP_W': 'n',
     'g_mindist_XL_W': 'n',
     'g_mindist_LYS_W': 'n',
-
+    'myg_mindist_diff_chain_LYS_LYS': 'n',
 
     }
 
