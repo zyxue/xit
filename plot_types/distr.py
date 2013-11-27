@@ -20,10 +20,10 @@ def distr(data, A, C, **kw):
         for c, gk in enumerate(data.keys()):
             da = data[gk]
             params = get_params(gk, pt_dd)
-            ax.plot(da[0], da[1], **params)
+            line = ax.plot(da[0], da[1], **params)
             # facecolor uses the same color as ax.plot
             ax.fill_between(da[0], da[1]-da[2], da[1]+da[2], 
-                            where=None, facecolor=params.get('color'), alpha=.3)
+                            where=None, facecolor=line[0].get_color(), alpha=.3)
         decorate_ax(ax, pt_dd)
     else:
         col, row = U.gen_rc(len(data.keys()), pt_dd)
@@ -34,9 +34,9 @@ def distr(data, A, C, **kw):
             # ax.errorbar(da[0], da[1], yerr=da[2], **params)
             xs, ys, es = da[0], da[1], da[2] # es: errors
 
-            ax.plot(xs, ys, **params)
+            line = ax.plot(xs, ys, **params)
             ax.fill_between(xs, ys-es, ys+es, 
-                            where=None, facecolor=params.get('color'), alpha=.3)
+                            where=None, facecolor=line[0].get_color(), alpha=.3)
 
             # do a gaussian fit
             if pt_dd.get('gaussian_fit'):
