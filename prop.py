@@ -317,7 +317,7 @@ INTERESTED_FIELDS = {
 # from mysys import read_mysys
 # mysys = read_mysys.read()
 
-NO_SCHEMA = ['upup_map']
+NO_SCHEMA = ['upup_map', 'unun_map']
 
 class Property(object):
     def __init__(self, pn):                                 # p: property name

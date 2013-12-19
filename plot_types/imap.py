@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
 import logging
 logger = logging.getLogger(__name__)
 
@@ -40,6 +39,7 @@ def imap(data, A, C, **kw):
 
         da = data[gk]
         rda = da
+        logger.info('map max: {0}; map min: {1}'.format(rda.max(), rda.min()))
 
         # JUST FOR REFERENCE OF SEEING WHERE THE END POINTS ARE, DEBUGGING USES
         # rda[-1][-1] = max_

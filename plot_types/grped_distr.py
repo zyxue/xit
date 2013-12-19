@@ -69,8 +69,10 @@ def grped_distr(data, A, C, **kw):
                 # now, plot the vertical bar showing the average value
                 m = da[1][0]    # mean
                 e = da[1][1]    # error
-                ax.plot([m,m], [0,1], color=params.get('color'))
-                ax.fill_betweenx([0,1], [m-e, m-e], [m+e, m+e],
+                
+                ave_y = pt_dd.get('ave_y', [0,1])
+                ax.plot([m,m], ave_y, color=params.get('color'))
+                ax.fill_betweenx(ave_y, [m-e, m-e], [m+e, m+e],
                                  where=None, facecolor=line[0].get_color(), alpha=.3)
 
             if pt_dd.get('gaussian_fit'):

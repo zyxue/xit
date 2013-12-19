@@ -139,9 +139,23 @@ def unun_map(**kw):
     # gromacs 4.0.7
     thextcf = kw['proxtcf'] if kw['use_pro'] else kw['orderxtcf']
     thegrof = kw['progrof'] if kw['use_pro'] else kw['ordergrof']
+#     return "unun_map.py \
+# -f {thextcf} \
+# -s {thegrof} \
+# -b {b} \
+# -e {e} \
+# -c 0.55 \
+# --h5 {h5_filename} \
+# -o {anal_dir}/{id_}_unun_map.log".format(thextcf=thextcf, thegrof=thegrof, **kw)
+
+    # temporary: make -c, --nres-away --query based on .xitconfig.yaml immediately
     return "unun_map.py \
 -f {thextcf} \
 -s {thegrof} \
 -b {b} \
--c 0.55 \
---h5 {h5_filename}".format(thextcf=thextcf, thegrof=thegrof, **kw)
+-e {e} \
+-c 1.2 \
+--nres-away 6 \
+--query 'name BB' \
+--h5 {h5_filename} \
+-o {anal_dir}/{id_}_unun_map.log".format(thextcf=thextcf, thegrof=thegrof, **kw)

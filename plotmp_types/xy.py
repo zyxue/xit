@@ -3,6 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 from collections import OrderedDict
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 import utils as U
@@ -156,7 +157,23 @@ def grped_xy(data, A, C, **kw):
 
 def decorate_ax(ax, pt_dd):
     if 'grid' in pt_dd: ax.grid(**pt_dd['grid'])
-    if 'xlim' in pt_dd: ax.set_xlim(**pt_dd['xlim'])
-    if 'ylim' in pt_dd: ax.set_ylim(**pt_dd['ylim'])
+    if 'xlim' in pt_dd: 
+        xlim = pt_dd['xlim']
+        left = xlim['left']
+        right = xlim['right']
+        ax.set_xlim(**xlim)
+        if 'xticks_interval' in pt_dd:
+            ax.set_xticks(np.arange(left, right, pt_dd['xticks_interval']))
+
+    if 'ylim' in pt_dd: 
+        ylim = pt_dd['ylim']
+        bottom = ylim['bottom']
+        top = ylim['top']
+        ax.set_ylim(**pt_dd['ylim'])
+        if 'yticks_interval' in pt_dd: 
+            ax.set_yticks(np.arange(bottom, top, pt_dd['yticks_interval']))
+
     if 'xlabel' in pt_dd: ax.set_xlabel(**pt_dd['xlabel'])
     if 'ylabel' in pt_dd: ax.set_ylabel(**pt_dd['ylabel'])
+
+

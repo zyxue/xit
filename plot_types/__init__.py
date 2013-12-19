@@ -1,3 +1,5 @@
+# Seems pickle cannot be used as cache, still very slow
+
 import os
 import inspect
 import pickle

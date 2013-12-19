@@ -234,7 +234,7 @@ def calc_alx(h5, gk, grp, prop_obj, prop_dd, A, C):
 def calc_imap(h5, gk, grp, prop_obj, prop_dd, A, C):
     grp_tb = fetch_grp_tb(h5, grp, prop_obj.name)
     _l = []
-    for tb in grp_tb:                              # it could be array
+    for tb in grp_tb:           # it could be array
         _l.append(tb)
     # no need to normalize when plotting a map!
     res = np.array(_l).mean(axis=0)
