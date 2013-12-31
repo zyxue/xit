@@ -1,3 +1,6 @@
+import os
+import utils as U
+
 def myg_mindist_diff_chain_LYS_LYS(**kw):
     return "printf 'LYS\nLYS\n' | myg_mindist_diff_chain \
 -f {orderxtcf} \
@@ -138,7 +141,31 @@ def unun_map(**kw):
     # dDA < 3.5nm & angle ADH<30 degree, which is the default criteria in
     # gromacs 4.0.7
     thextcf = kw['proxtcf'] if kw['use_pro'] else kw['orderxtcf']
-    thegrof = kw['progrof'] if kw['use_pro'] else kw['ordergrof']
+    if os.path.exists(kw['order_cid_pdbf']):
+        thegrof = kw['order_cid_pdbf']
+    else:
+        thegrof = kw['progrof'] if kw['use_pro'] else kw['ordergrof']
+
+    dd = U.get_anal_dd(kw['C'], 'unun_map')
+    rest = "unun_map.py \
+-f {thextcf} \
+-s {thegrof} \
+-b {b} \
+-e {e} \
+--h5 {h5_filename} \
+-o {anal_dir}/{id_}_unun_map.log \
+--cutoff {cutoff} \
+--nres-away {nres_away} \
+--query '{query}'".format(thextcf=thextcf, thegrof=thegrof,
+                          cutoff=dd['cutoff'], nres_away=dd['nres_away'], 
+                          query=dd['query'], **kw)
+
+    if dd.get('is_multimer', False):
+        # be careful of the space in front, it's essential
+        rest += ' --is-multimer --num-atoms-per-seg {0}'.format(dd['num_atoms_per_seg'])
+    return rest
+
+# FOR REFERENCE to the old analysis of atomistic simulations only
 #     return "unun_map.py \
 # -f {thextcf} \
 # -s {thegrof} \
@@ -147,15 +174,3 @@ def unun_map(**kw):
 # -c 0.55 \
 # --h5 {h5_filename} \
 # -o {anal_dir}/{id_}_unun_map.log".format(thextcf=thextcf, thegrof=thegrof, **kw)
-
-    # temporary: make -c, --nres-away --query based on .xitconfig.yaml immediately
-    return "unun_map.py \
--f {thextcf} \
--s {thegrof} \
--b {b} \
--e {e} \
--c 1.2 \
---nres-away 6 \
---query 'name BB' \
---h5 {h5_filename} \
--o {anal_dir}/{id_}_unun_map.log".format(thextcf=thextcf, thegrof=thegrof, **kw)

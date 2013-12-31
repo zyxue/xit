@@ -171,3 +171,9 @@ def symlink_md2pro(**kw):
     relprof = os.path.relpath(kw['grof'], dirname)
     return "ln -sfv {relxtcf} {proxtcf}; ln -sfv {relprof} {progrof}".format(
         relxtcf=relxtcf, proxtcf=proxtcf, relprof=relprof, progrof=progrof)
+
+def add_cid_to_order_pdb(**kw):
+    p1 = 'editconf -f {ordergrof} -o {orderpdbf}'.format(**kw)
+    # this is temporary and specific to CG_epx/epz1 only 
+    p2 = 'add_cid_to_pdb.py -f {orderpdbf} -n 262 --exresname W -o {order_cid_pdbf}'.format(**kw)
+    return p1 + '\n' + p2

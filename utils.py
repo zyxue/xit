@@ -186,6 +186,10 @@ def gen_io_files(target_dir, pf):
             target_dir, '{pf}_order.xtc'.format(pf=pf)),
         ordergrof = os.path.join(
             target_dir, '{pf}_order.gro'.format(pf=pf)),
+        orderpdbf = os.path.join(
+            target_dir, '{pf}_order.pdb'.format(pf=pf)),
+        order_cid_pdbf = os.path.join(
+            target_dir, '{pf}_order_cid.pdb'.format(pf=pf)),
         grof = os.path.join(
             target_dir, '{pf}_md.gro'.format(pf=pf)),
         cptf = os.path.join(
